@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0",
+  "name": "common",
+  "version": "0.1.0",
+  "description": "Reglas compartidas por desarrollo y calidad.",
+  "extends": [],
+  "assets": [
+    "steering-core-security",
+    "steering-core-engineering-quality",
+    "steering-core-dev-qa-workflow"
+  ]
+}

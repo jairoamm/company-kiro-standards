@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0",
+  "name": "qa",
+  "version": "0.1.0",
+  "description": "Baseline común, estándares de automatización y Skills de performance.",
+  "extends": ["common"],
+  "assets": [
+    "steering-qa-test-automation-standards",
+    "skill-generate-jmeter-project",
+    "skill-create-performance-plan",
+    "skill-analyze-jmeter-report"
+  ]
+}

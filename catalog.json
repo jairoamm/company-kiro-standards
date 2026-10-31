@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "1.0",
+  "version": "0.1.0",
+  "description": "Catálogo versionado de Steering y Skills compartidos para equipos de desarrollo y calidad.",
+  "assets": [
+    {
+      "id": "steering-core-security",
+      "name": "security",
+      "kind": "steering",
+      "category": "security",
+      "owner": "standards-maintainers",
+      "status": "approved",
+      "source": "steering/core/security.md",
+      "target": "steering/security.md"
+    },
+    {
+      "id": "steering-core-engineering-quality",
+      "name": "engineering-quality",
+      "kind": "steering",
+      "category": "engineering-quality",
+      "owner": "standards-maintainers",
+      "status": "approved",
+      "source": "steering/core/engineering-quality.md",
+      "target": "steering/engineering-quality.md"
+    },
+    {
+      "id": "steering-core-dev-qa-workflow",
+      "name": "dev-qa-workflow",
+      "kind": "steering",
+      "category": "dev-qa-workflow",
+      "owner": "standards-maintainers",
+      "status": "approved",
+      "source": "steering/core/dev-qa-workflow.md",
+      "target": "steering/dev-qa-workflow.md"
+    },
+    {
+      "id": "steering-development-standards",
+      "name": "development-standards",
+      "kind": "steering",
+      "category": "development",
+      "owner": "development-leads",
+      "status": "approved",
+      "source": "steering/development/development-standards.md",
+      "target": "steering/development-standards.md"
+    },
+    {
+      "id": "steering-qa-test-automation-standards",
+      "name": "test-automation-standards",
+      "kind": "steering",
+      "category": "quality-assurance",
+      "owner": "quality-leads",
+      "status": "approved",
+      "source": "steering/qa/test-automation-standards.md",
+      "target": "steering/test-automation-standards.md"
+    },
+    {
+      "id": "skill-generate-jmeter-project",
+      "name": "generate-jmeter-project",
+      "kind": "skill",
+      "category": "performance-testing",
+      "owner": "performance-test-leads",
+      "status": "approved",
+      "source": "skills/performance/generate-jmeter-project/SKILL.md",
+      "target": "skills/generate-jmeter-project/SKILL.md"
+    },
+    {
+      "id": "skill-create-performance-plan",
+      "name": "create-performance-plan",
+      "kind": "skill",
+      "category": "performance-testing",
+      "owner": "performance-test-leads",
+      "status": "approved",
+      "source": "skills/performance/create-performance-plan/SKILL.md",
+      "target": "skills/create-performance-plan/SKILL.md"
+    },
+    {
+      "id": "skill-analyze-jmeter-report",
+      "name": "analyze-jmeter-report",
+      "kind": "skill",
+      "category": "performance-testing",
+      "owner": "performance-test-leads",
+      "status": "approved",
+      "source": "skills/performance/analyze-jmeter-report/SKILL.md",
+      "target": "skills/analyze-jmeter-report/SKILL.md"
+    }
+  ]
+}

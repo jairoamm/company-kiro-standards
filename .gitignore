@@ -1,0 +1,9 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+*.tmp
+.coverage
+.venv/
+venv/
+.idea/
+.vscode/

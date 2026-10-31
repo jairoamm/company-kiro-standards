@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "name": "developer",
+  "version": "0.1.0",
+  "description": "Baseline común más estándares propios de desarrollo.",
+  "extends": ["common"],
+  "assets": [
+    "steering-development-standards"
+  ]
+}
