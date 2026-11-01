@@ -2,6 +2,12 @@
 
 Todos los cambios relevantes de este proyecto se documentan aquí.
 
+## [0.1.1] - Unreleased
+
+### Changed
+
+- Actualizada la terminología para usar “validación de QA” en los estándares compartidos.
+
 ## [0.1.0] - 2026-10-28
 
 ### Added

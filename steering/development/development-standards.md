@@ -11,4 +11,4 @@ inclusion: always
 - Proporciona testabilidad: identificadores UI estables, errores estructurados, correlation IDs y fronteras sustituibles para dependencias externas.
 - Ejecuta la prueba focalizada y la regresión relacionada. Si una suite no puede ejecutarse, explica la causa y el riesgo.
 - Comparte con QA el resultado de cobertura y análisis estático disponible; no uses el porcentaje como sustituto de la cobertura de riesgos.
-- Documenta en el ticket la causa confirmada, el cambio, las pruebas, el commit y el build listo para retest.
+- Documenta en el ticket la causa confirmada, el cambio, las pruebas, el commit y el build listo para validación de QA.
