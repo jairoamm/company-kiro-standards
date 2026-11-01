@@ -449,7 +449,7 @@ def apply_plan(
         ]
         manifest: Dict[str, Any] = {
             "schemaVersion": "1.0",
-            "repository": "bam-kiro-standards",
+            "repository": "company-kiro-standards",
             "bundle": bundle,
             "version": version,
             "installedAt": datetime.now(timezone.utc).isoformat(),
