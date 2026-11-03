@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Catálogo versionado de Steering y Skills compartidos para equipos de desarrollo y calidad.",
   "assets": [
     {
@@ -44,6 +44,16 @@
       "target": "steering/development-standards.md"
     },
     {
+      "id": "steering-development-ui-testability",
+      "name": "ui-testability",
+      "kind": "steering",
+      "category": "development",
+      "owner": "development-leads",
+      "status": "approved",
+      "source": "steering/development/ui-testability.md",
+      "target": "steering/ui-testability.md"
+    },
+    {
       "id": "steering-qa-test-automation-standards",
       "name": "test-automation-standards",
       "kind": "steering",
@@ -52,6 +62,46 @@
       "status": "approved",
       "source": "steering/qa/test-automation-standards.md",
       "target": "steering/test-automation-standards.md"
+    },
+    {
+      "id": "steering-qa-black-box-test-automation",
+      "name": "black-box-test-automation",
+      "kind": "steering",
+      "category": "quality-assurance",
+      "owner": "quality-leads",
+      "status": "approved",
+      "source": "steering/qa/black-box-test-automation.md",
+      "target": "steering/black-box-test-automation.md"
+    },
+    {
+      "id": "skill-prepare-qa-handoff",
+      "name": "prepare-qa-handoff",
+      "kind": "skill",
+      "category": "development",
+      "owner": "development-leads",
+      "status": "approved",
+      "source": "skills/development/prepare-qa-handoff/SKILL.md",
+      "target": "skills/prepare-qa-handoff/SKILL.md"
+    },
+    {
+      "id": "skill-generate-selenium-tests",
+      "name": "generate-selenium-tests",
+      "kind": "skill",
+      "category": "quality-assurance",
+      "owner": "quality-leads",
+      "status": "approved",
+      "source": "skills/qa/generate-selenium-tests/SKILL.md",
+      "target": "skills/generate-selenium-tests/SKILL.md"
+    },
+    {
+      "id": "skill-test-plan-traceability",
+      "name": "test-plan-traceability",
+      "kind": "skill",
+      "category": "dev-qa-workflow",
+      "owner": "standards-maintainers",
+      "status": "approved",
+      "source": "skills/shared/test-plan-traceability/SKILL.md",
+      "target": "skills/test-plan-traceability/SKILL.md"
     },
     {
       "id": "skill-generate-jmeter-project",

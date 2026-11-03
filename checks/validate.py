@@ -66,6 +66,36 @@ PERSONAL_PATH_PATTERNS = {
     "Windows personal path": re.compile(r"[A-Za-z]:\\Users\\[^\\<\s]+\\"),
 }
 TEXT_SUFFIXES = {".md", ".json", ".py", ".sh", ".ps1", ".txt", ".yaml", ".yml"}
+REQUIRED_ROLE_ASSETS: Mapping[str, Set[str]] = {
+    "developer": {
+        "steering-development-ui-testability",
+        "skill-prepare-qa-handoff",
+        "skill-test-plan-traceability",
+    },
+    "qa": {
+        "steering-qa-black-box-test-automation",
+        "skill-generate-selenium-tests",
+        "skill-test-plan-traceability",
+        "skill-generate-jmeter-project",
+        "skill-create-performance-plan",
+        "skill-analyze-jmeter-report",
+    },
+}
+FORBIDDEN_ROLE_ASSETS: Mapping[str, Set[str]] = {
+    "developer": {
+        "steering-qa-test-automation-standards",
+        "steering-qa-black-box-test-automation",
+        "skill-generate-selenium-tests",
+        "skill-generate-jmeter-project",
+        "skill-create-performance-plan",
+        "skill-analyze-jmeter-report",
+    },
+    "qa": {
+        "steering-development-standards",
+        "steering-development-ui-testability",
+        "skill-prepare-qa-handoff",
+    },
+}
 
 
 class Validator:
@@ -266,10 +296,27 @@ def validate_bundles(
         active.remove(name)
         return result
 
+    resolved_by_bundle: Dict[str, Set[str]] = {}
     for name in sorted(bundles):
         resolved = resolve(name, set())
+        resolved_by_bundle[name] = set(resolved)
         if len(resolved) != len(set(resolved)):
             validator.error(f"Bundle {name} resolves duplicate assets through inheritance")
+
+    for name, required in REQUIRED_ROLE_ASSETS.items():
+        missing = sorted(required - resolved_by_bundle.get(name, set()))
+        if missing:
+            validator.error(
+                f"Bundle {name} is missing required role assets: " + ", ".join(missing)
+            )
+
+    for name, forbidden in FORBIDDEN_ROLE_ASSETS.items():
+        unexpected = sorted(forbidden & resolved_by_bundle.get(name, set()))
+        if unexpected:
+            validator.error(
+                f"Bundle {name} contains assets owned by another role: "
+                + ", ".join(unexpected)
+            )
 
     unused = sorted(set(assets) - used_assets)
     if unused:

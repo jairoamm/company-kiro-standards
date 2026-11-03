@@ -51,6 +51,19 @@ Recomendaciones:
 - Actualiza mediante un pull request generado desde una nueva release; no edites las copias administradas directamente.
 - Mantén producto, arquitectura, comandos y Specs propios junto a la aplicación.
 
+## Flujo de actualización
+
+```text
+Cambio central revisado
+→ release o tag inmutable
+→ pull request en el proyecto consumidor
+→ revisión del diff administrado y del manifiesto
+→ gates del proyecto
+→ merge
+```
+
+No sincronices manualmente cada día ni conectes un proyecto consumidor a `main`. La persona que mantiene el proyecto selecciona una release, ejecuta primero el dry-run y presenta la actualización para revisión.
+
 ## Modelo híbrido recomendado
 
 ```text

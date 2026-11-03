@@ -55,6 +55,9 @@ Spec específica de la Historia de Usuario
 │   ├── development/
 │   └── qa/
 ├── skills/
+│   ├── development/
+│   ├── qa/
+│   ├── shared/
 │   └── performance/
 ├── bundles/
 │   ├── common.json
@@ -74,8 +77,8 @@ Spec específica de la Historia de Usuario
 | Bundle | Contenido |
 |---|---|
 | `common` | Seguridad, calidad de ingeniería y flujo Dev + QA |
-| `developer` | `common` más estándares de desarrollo |
-| `qa` | `common`, automatización y tres Skills de performance |
+| `developer` | `common`, estándares de desarrollo, testabilidad UI, preparación de handoff y trazabilidad |
+| `qa` | `common`, automatización de caja negra, generación Selenium, trazabilidad y las tres Skills de performance |
 
 Las Specs nunca se distribuyen desde este repositorio. Pertenecen a una Historia de Usuario y a un proyecto concretos.
 
@@ -165,6 +168,18 @@ Esta información cambia junto con el código y no debe instalarse globalmente.
 ## Asegurar adopción en computadores y proyectos
 
 El repositorio central por sí solo no garantiza instalación. Usa el manifiesto y `--verify` para comprobar el baseline global de cada computador; en proyectos que exigen una versión auditable, instala también el bundle en `<proyecto>/.kiro`, versiona los activos y comprueba sus hashes en CI.
+
+Las actualizaciones siguen este flujo:
+
+```text
+Release central inmutable
+→ pull request de actualización en el proyecto consumidor
+→ revisión del diff y del manifiesto
+→ validación
+→ merge
+```
+
+No se recomienda una sincronización manual diaria ni consumir `main` directamente. Cada proyecto adopta una release revisada mediante su propio pull request.
 
 Consulta [docs/adoption.md](docs/adoption.md) para el modelo híbrido, las garantías de cada control y el proceso de incorporación.
 

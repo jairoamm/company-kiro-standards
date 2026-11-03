@@ -1,11 +1,14 @@
 {
   "schemaVersion": "1.0",
   "name": "qa",
-  "version": "0.1.1",
-  "description": "Baseline común, estándares de automatización y Skills de performance.",
+  "version": "0.2.0",
+  "description": "Baseline común, automatización de caja negra, trazabilidad y Skills de performance.",
   "extends": ["common"],
   "assets": [
     "steering-qa-test-automation-standards",
+    "steering-qa-black-box-test-automation",
+    "skill-generate-selenium-tests",
+    "skill-test-plan-traceability",
     "skill-generate-jmeter-project",
     "skill-create-performance-plan",
     "skill-analyze-jmeter-report"

@@ -1,10 +1,13 @@
 {
   "schemaVersion": "1.0",
   "name": "developer",
-  "version": "0.1.1",
-  "description": "Baseline común más estándares propios de desarrollo.",
+  "version": "0.2.0",
+  "description": "Baseline común más desarrollo y preparación del handoff para QA.",
   "extends": ["common"],
   "assets": [
-    "steering-development-standards"
+    "steering-development-standards",
+    "steering-development-ui-testability",
+    "skill-prepare-qa-handoff",
+    "skill-test-plan-traceability"
   ]
 }
