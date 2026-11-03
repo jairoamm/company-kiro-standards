@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
   "name": "common",
-  "version": "0.2.0",
-  "description": "Reglas compartidas por desarrollo y calidad.",
+  "version": "0.2.1",
+  "description": "Assets de workspace compartidos por desarrollo y calidad.",
   "extends": [],
   "assets": [
     "steering-core-security",

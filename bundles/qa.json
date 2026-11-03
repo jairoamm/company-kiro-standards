@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
   "name": "qa",
-  "version": "0.2.0",
-  "description": "Baseline común, automatización de caja negra, trazabilidad y Skills de performance.",
+  "version": "0.2.1",
+  "description": "Assets de workspace: baseline común, automatización de caja negra, trazabilidad y Skills de performance.",
   "extends": ["common"],
   "assets": [
     "steering-qa-test-automation-standards",

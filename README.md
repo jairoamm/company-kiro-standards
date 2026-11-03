@@ -5,11 +5,11 @@ Repositorio de referencia para versionar y distribuir un conjunto pequeño de St
 ## Qué resuelve
 
 - Mantiene estándares comunes en una única fuente versionada.
-- Distribuye solo los activos apropiados para cada rol mediante bundles.
-- Muestra cambios antes de instalarlos.
+- Distribuye estándares de proyecto mediante bundles de workspace y comportamiento personal mediante perfiles por rol.
+- Muestra cambios antes de instalar activos de workspace.
 - Evita sobrescribir archivos locales que esta herramienta no administra.
 - Crea respaldos y permite revertir la última instalación.
-- Separa reglas organizacionales de contexto específico de cada aplicación.
+- Separa reglas organizacionales, comportamiento por rol y contexto específico de cada aplicación.
 
 ## Qué es nativo de Kiro
 
@@ -18,31 +18,29 @@ Kiro reconoce:
 - Steering de workspace en `.kiro/steering/` y Steering global en `~/.kiro/steering/`.
 - Skills portables que empaquetan instrucciones y recursos reutilizables.
 - Configuración por capas, donde el contexto más específico complementa o prevalece sobre el más general.
+- Steering con inclusión `manual` o `auto`; ambos aparecen como comandos y `auto` puede activarse cuando la solicitud coincide con su descripción.
 
 Fuentes oficiales:
 
 - [Steering](https://kiro.dev/docs/steering/)
 - [Agent Skills](https://kiro.dev/docs/skills/)
 - [Configuration scopes](https://kiro.dev/docs/configuration/)
+- [Slash commands](https://kiro.dev/docs/ide/chat/slash-commands/)
 
 El contenido de esas páginas se resume y reformula aquí.
 
 ## Qué agrega este repositorio
 
-`catalog.json`, `bundles/`, `tools/` y `checks/` son convenciones de este proyecto. No son funciones nativas llamadas “bundles” o “Standards Hub” dentro de Kiro.
+`catalog.json`, `bundles/`, `profiles/`, `tools/` y `checks/` son convenciones de este proyecto. No son funciones nativas llamadas “bundles”, “profiles” o “Standards Hub” dentro de Kiro.
 
 ```text
-Repositorio central versionado
-        ↓
-Bundle common, developer o qa
-        ↓
-Dry-run y revisión
-        ↓
-Instalación en KIRO_HOME
-        +
-Steering específico del proyecto
-        +
-Spec específica de la Historia de Usuario
+Release central revisada
+        ├── bundle de workspace ──→ <repo>/.kiro/ mediante pull request
+        └── perfil por rol ───────→ ~/.kiro/steering/ para una persona
+
+<repo>/.kiro/ + perfil personal + Spec de la Historia de Usuario
+                            ↓
+                           Kiro
 ```
 
 ## Estructura
@@ -59,6 +57,9 @@ Spec específica de la Historia de Usuario
 │   ├── qa/
 │   ├── shared/
 │   └── performance/
+├── profiles/
+│   ├── development/steering/
+│   └── qa/steering/
 ├── bundles/
 │   ├── common.json
 │   ├── developer.json
@@ -72,7 +73,25 @@ Spec específica de la Historia de Usuario
 └── docs/
 ```
 
+## Alcance y destino
+
+| Fuente | Alcance | Destino | Instalación |
+|---|---|---|---|
+| `steering/core/`, `steering/development/`, `steering/qa/` y Skills seleccionados por los bundles | Workspace; aplica a toda persona que abre el proyecto | `<repo>/.kiro/` | Release revisada mediante pull request en el repositorio consumidor |
+| `profiles/development/` | Usuario que actúa como Development | `~/.kiro/steering/` | Solo en el perfil Development; nunca en el repositorio de la aplicación |
+| `profiles/qa/` | Usuario que actúa como QA | `~/.kiro/steering/` | Solo en el perfil QA; nunca en el repositorio de la aplicación |
+
+Los hechos del producto y del proyecto permanecen en el workspace. El comportamiento que depende de la persona o de su rol permanece en el perfil. Un procedimiento puntual y reutilizable puede ser un Skill.
+
+Los perfiles no forman parte de `catalog.json`, no se incluyen en bundles y no los instala `tools/sync.py`. Una persona con doble rol debe usar perfiles o configuraciones separadas, o conservar inclusión manual y activar un solo rol por sesión. Nunca debe instalar dos Steering contradictorios con inclusión `auto` en la misma configuración.
+
+Steering guía a Kiro, pero no es un control de acceso. Los permisos del repositorio, protección de ramas, ownership y revisiones obligatorias deben aplicar los límites reales.
+
+Consulta [docs/scopes-and-profiles.md](docs/scopes-and-profiles.md) para el modelo completo y el flujo QA diagnóstico → handoff → Development corrección.
+
 ## Bundles disponibles
+
+Todos los bundles son assets de workspace y se instalan en `<repo>/.kiro/`.
 
 | Bundle | Contenido |
 |---|---|
@@ -116,27 +135,43 @@ cat "$KIRO_HOME_DEMO/.standards-hub/manifest.json"
 
 La demostración no modifica la configuración real de Kiro.
 
-## Instalación global deliberada
+## Instalación deliberada en un workspace
 
-Primero fija y revisa una versión o tag. Después ejecuta siempre un dry-run:
+Primero fija y revisa una versión o tag. Después apunta `--kiro-home` al `.kiro` del proyecto y ejecuta un dry-run:
 
 ```bash
+PROJECT_ROOT="/ruta/absoluta/al/proyecto"
+
 ./tools/sync.sh \
   --bundle developer \
-  --kiro-home "$HOME/.kiro" \
+  --kiro-home "$PROJECT_ROOT/.kiro" \
   --dry-run
 ```
 
-Solo después de revisar el resultado:
+Después de revisar el resultado, aplica la instalación y presenta los archivos administrados mediante un pull request del proyecto consumidor:
 
 ```bash
 ./tools/sync.sh \
   --bundle developer \
-  --kiro-home "$HOME/.kiro" \
+  --kiro-home "$PROJECT_ROOT/.kiro" \
   --apply
 ```
 
-En Windows utiliza `tools/sync.ps1` con los mismos argumentos.
+En Windows utiliza `tools/sync.ps1` con los mismos argumentos. No uses este sincronizador para copiar perfiles globales.
+
+## Distribución de perfiles por rol
+
+La distribución administrada debe copiar exactamente el archivo del rol correspondiente:
+
+```text
+profiles/development/steering/dev-bug-resolution.md
+    → ~/.kiro/steering/dev-bug-resolution.md
+
+profiles/qa/steering/qa-bug-investigation.md
+    → ~/.kiro/steering/qa-bug-investigation.md
+```
+
+Ambos perfiles usan inclusión manual para que el rol se seleccione de forma explícita durante un bugfix. Estos archivos no se copian a `.kiro/` de una aplicación.
 
 ## Comportamiento seguro del sincronizador
 
@@ -163,13 +198,13 @@ proyecto/.kiro/steering/
 └── test-commands.md
 ```
 
-Esta información cambia junto con el código y no debe instalarse globalmente.
+Esta información cambia junto con el código y no debe instalarse como perfil global.
 
-## Asegurar adopción en computadores y proyectos
+## Asegurar adopción en proyectos y perfiles
 
-El repositorio central por sí solo no garantiza instalación. Usa el manifiesto y `--verify` para comprobar el baseline global de cada computador; en proyectos que exigen una versión auditable, instala también el bundle en `<proyecto>/.kiro`, versiona los activos y comprueba sus hashes en CI.
+El repositorio central por sí solo no garantiza instalación. Cada proyecto adopta un bundle en `<repo>/.kiro/` mediante una release revisada y un pull request. La administración de equipos distribuye por separado un único perfil personal a `~/.kiro/steering/` según el rol.
 
-Las actualizaciones siguen este flujo:
+Las actualizaciones de workspace siguen este flujo:
 
 ```text
 Release central inmutable
@@ -179,9 +214,7 @@ Release central inmutable
 → merge
 ```
 
-No se recomienda una sincronización manual diaria ni consumir `main` directamente. Cada proyecto adopta una release revisada mediante su propio pull request.
-
-Consulta [docs/adoption.md](docs/adoption.md) para el modelo híbrido, las garantías de cada control y el proceso de incorporación.
+No se recomienda una sincronización manual diaria ni consumir `main` directamente. Consulta [docs/adoption.md](docs/adoption.md) para las garantías de cada control y el proceso de incorporación.
 
 ## Validación
 
@@ -189,7 +222,7 @@ Consulta [docs/adoption.md](docs/adoption.md) para el modelo híbrido, las garan
 python3 checks/validate.py
 ```
 
-El validador revisa JSON, bundles, herencia, fuentes, destinos, frontmatter, symlinks, rutas personales y patrones básicos de secretos o instrucciones peligrosas. No ejecuta Skills.
+El validador revisa JSON, bundles, herencia, fuentes, destinos, frontmatter, perfiles, symlinks, rutas personales y patrones básicos de secretos o instrucciones peligrosas. También comprueba que los perfiles no entren en los bundles. No ejecuta Skills.
 
 ## Gobierno y publicación
 

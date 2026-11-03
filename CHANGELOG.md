@@ -2,7 +2,19 @@
 
 Todos los cambios relevantes de este proyecto se documentan aquí.
 
-## [0.2.0] - Unreleased
+## [0.2.1] - Unreleased
+
+### Added
+
+- Perfiles globales manuales y separados para investigación QA y resolución Development de bugs.
+- Guía de alcances, frontera de intercambio con acceso de solo lectura y flujo de handoff QA → Development.
+- Validaciones para impedir que los perfiles personales entren en el catálogo o en bundles de workspace.
+
+### Changed
+
+- Documentados los bundles exclusivamente como assets de workspace instalados en `<repo>/.kiro/` mediante pull request.
+
+## [0.2.0] - 2026-11-02
 
 ### Added
 

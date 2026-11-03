@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
-  "version": "0.2.0",
-  "description": "Catálogo versionado de Steering y Skills compartidos para equipos de desarrollo y calidad.",
+  "version": "0.2.1",
+  "description": "Catálogo versionado de Steering y Skills de workspace compartidos para equipos de desarrollo y calidad.",
   "assets": [
     {
       "id": "steering-core-security",

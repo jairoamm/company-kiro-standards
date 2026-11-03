@@ -4,7 +4,7 @@ inclusion: always
 
 # Automatización QA de caja negra
 
-- Trata la aplicación como una entrega desplegada. QA no accede, clona, construye ni inicia el repositorio de Desarrollo.
+- Durante la automatización funcional del handoff, trata la aplicación como una entrega desplegada y no uses el repositorio de Development para derivar las pruebas. Una investigación de bugs con acceso autorizado se rige por el perfil QA y queda fuera de este alcance de caja negra.
 - Usa como entradas la Historia de Usuario, el plan QA aprobado, la URL autorizada, el build, el commit de aplicación, los datos de prueba y `ui-selectors.json`.
 - Confirma antes de ejecutar que la URL corresponde al ambiente autorizado y registra URL, build, commit, versión del contrato y hora con la evidencia.
 - Localiza controles por rol o nombre accesible cuando el plan lo permita; para estados ambiguos o dinámicos, usa únicamente selectores estables publicados en el contrato.

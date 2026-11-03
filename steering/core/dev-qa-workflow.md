@@ -12,6 +12,6 @@ inclusion: always
 - El handoff hacia Testing debe incluir commit, build, ambiente, pruebas pre-deploy, cobertura disponible, limitaciones y criterios implementados.
 - Un bug debe registrar Historia de Usuario, criterio afectado, caso, pasos, esperado, observado, build, ambiente, datos, plataforma, reproducibilidad y evidencia.
 - Separa hechos, hipótesis y causa confirmada. Una captura prueba el síntoma; no demuestra por sí sola la causa técnica.
-- Antes de corregir un bug, reproduce el comportamiento y agrega la prueba de regresión en el nivel más bajo que pueda demostrarlo.
-- La corrección debe ser mínima, revisada y acompañada por evidencia roja antes del cambio y verde después.
+- Antes de que Development corrija un bug, QA entrega los pasos y la evidencia de reproducción. Development confirma el comportamiento y agrega la prueba de regresión en el nivel más bajo que pueda demostrarlo.
+- La corrección de Development debe ser mínima, revisada y acompañada por evidencia roja antes del cambio y verde después.
 - Desarrollo entrega el nuevo build y la evidencia técnica. QA realiza una validación independiente antes de cerrar el bug o certificar la Historia de Usuario.

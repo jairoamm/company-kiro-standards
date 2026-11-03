@@ -2,8 +2,8 @@
 
 ## Antes de proponer un cambio
 
-1. Identifica si el contenido es global, propio de un rol o específico de un proyecto.
-2. Mantén el contexto de una aplicación fuera de este repositorio.
+1. Identifica si el contenido es un estándar de workspace, comportamiento de perfil por rol, un procedimiento puntual o contexto específico de un proyecto.
+2. Mantén el contexto de una aplicación fuera de este repositorio y los perfiles personales fuera del catálogo y los bundles.
 3. Confirma el owner que revisará el activo.
 4. Evita duplicar capacidades nativas de Kiro con un Skill.
 

@@ -22,6 +22,7 @@ ALLOWED_TOP_LEVEL = {
     "catalog.json",
     "steering",
     "skills",
+    "profiles",
     "bundles",
     "tools",
     "checks",
@@ -43,6 +44,9 @@ REQUIRED_FILES = {
     "docs/adoption.md",
     "docs/governance.md",
     "docs/demo-runbook.md",
+    "docs/scopes-and-profiles.md",
+    "profiles/development/steering/dev-bug-resolution.md",
+    "profiles/qa/steering/qa-bug-investigation.md",
 }
 SECRET_PATTERNS = {
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
@@ -94,6 +98,41 @@ FORBIDDEN_ROLE_ASSETS: Mapping[str, Set[str]] = {
         "steering-development-standards",
         "steering-development-ui-testability",
         "skill-prepare-qa-handoff",
+    },
+}
+PROFILE_FILES: Mapping[str, Path] = {
+    "development": Path("profiles/development/steering/dev-bug-resolution.md"),
+    "qa": Path("profiles/qa/steering/qa-bug-investigation.md"),
+}
+PROFILE_REQUIRED_SNIPPETS: Mapping[str, Set[str]] = {
+    "development": {
+        "bug-diagnosis.md",
+        "bugfix spec",
+        "prueba de regresión",
+        "prueba roja",
+        "cambio mínimo",
+        "gates",
+        "reconcilia las specs",
+        ".kiro/specs/<bug>/{bugfix,design,tasks}.md",
+        "draft — no aprobado",
+        "no concede permisos",
+    },
+    "qa": {
+        "inspeccionar",
+        "reproducir",
+        "diagnosticar",
+        "documenta",
+        "bug-diagnosis.md",
+        "dev-intake.md",
+        "no edites código productivo",
+        "no crees, cambies ni elimines pruebas",
+        "no cambies dependencias",
+        "no implementes la corrección",
+        "no incluyas la corrección en un commit",
+        "acceso remoto de solo lectura",
+        ".kiro/specs/<bug>/{bugfix,design,tasks}.md",
+        "draft — no aprobado",
+        "no concede permisos",
     },
 }
 
@@ -245,6 +284,70 @@ def validate_catalog(validator: Validator) -> tuple[str, Mapping[str, Mapping[st
     return version, assets
 
 
+def validate_profiles(
+    assets: Mapping[str, Mapping[str, Any]], validator: Validator
+) -> None:
+    inclusions: Dict[str, str] = {}
+    profile_markers = {
+        marker
+        for path in PROFILE_FILES.values()
+        for marker in {path.as_posix(), path.stem}
+    }
+
+    for role, relative in PROFILE_FILES.items():
+        path = ROOT / relative
+        if not path.is_file():
+            continue
+
+        frontmatter = parse_frontmatter(path, validator)
+        inclusion = frontmatter.get("inclusion", "")
+        if inclusion not in {"auto", "manual"}:
+            validator.error(
+                f"Profile {role} must use auto or manual inclusion: {relative}"
+            )
+        else:
+            inclusions[role] = inclusion
+        if frontmatter.get("name") != path.stem:
+            validator.error(f"Profile name must match filename: {relative}")
+        if len(frontmatter.get("description", "")) < 40:
+            validator.error(f"Profile description is too short: {relative}")
+
+        text = path.read_text(encoding="utf-8").casefold()
+        missing = sorted(
+            snippet
+            for snippet in PROFILE_REQUIRED_SNIPPETS[role]
+            if snippet.casefold() not in text
+        )
+        if missing:
+            validator.error(
+                f"Profile {role} is missing required boundaries: " + ", ".join(missing)
+            )
+
+    if len(inclusions) == len(PROFILE_FILES) and all(
+        inclusion == "auto" for inclusion in inclusions.values()
+    ):
+        validator.error(
+            "Development and QA profiles cannot both use auto inclusion because "
+            "their bugfix responsibilities conflict"
+        )
+
+    for asset_id, asset in assets.items():
+        source = asset.get("source")
+        if isinstance(source, str) and source.startswith("profiles/"):
+            validator.error(
+                f"Personal profile must not be a catalog asset: {asset_id} ({source})"
+            )
+
+    for bundle_path in sorted((ROOT / "bundles").glob("*.json")):
+        text = bundle_path.read_text(encoding="utf-8")
+        included_markers = sorted(marker for marker in profile_markers if marker in text)
+        if included_markers:
+            validator.error(
+                f"Bundle {bundle_path.stem} references personal profile content: "
+                + ", ".join(included_markers)
+            )
+
+
 def validate_bundles(
     version: str, assets: Mapping[str, Mapping[str, Any]], validator: Validator
 ) -> None:
@@ -338,7 +441,7 @@ def validate_text_content(validator: Validator) -> None:
         for label, pattern in PERSONAL_PATH_PATTERNS.items():
             if pattern.search(text):
                 validator.error(f"Possible {label} in {relative}")
-        if relative.parts and relative.parts[0] in {"skills", "steering"}:
+        if relative.parts and relative.parts[0] in {"skills", "steering", "profiles"}:
             for label, pattern in DANGEROUS_PATTERNS.items():
                 if pattern.search(text):
                     validator.error(f"Dangerous instruction ({label}) in {relative}")
@@ -348,6 +451,7 @@ def main() -> int:
     validator = Validator()
     validate_root(validator)
     version, assets = validate_catalog(validator)
+    validate_profiles(assets, validator)
     validate_bundles(version, assets, validator)
     validate_text_content(validator)
 

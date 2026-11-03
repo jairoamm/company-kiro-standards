@@ -46,7 +46,7 @@ El sincronizador trabaja sobre el checkout local proporcionado. El mecanismo org
 - Alcance suficientemente general.
 - Ausencia de contradicciones.
 - Regla accionable y verificable.
-- Separación entre estándar global y contexto del proyecto.
+- Separación entre estándar de workspace, perfil personal por rol y contexto específico del proyecto.
 - Impacto sobre desarrollo y QA revisado por ambos roles.
 
 ### Skills
