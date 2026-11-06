@@ -2,7 +2,22 @@
 
 Todos los cambios relevantes de este proyecto se documentan aquí.
 
-## [0.2.1] - Unreleased
+## [0.2.2] - Unreleased
+
+### Added
+
+- Skill QA `generate-karate-tests` para generar features y runners JUnit desde contratos API aprobados, sin duplicar Postman ni inventar autenticación.
+- Ejemplos pequeños y rutas de salida concretas para Selenium, Karate, trazabilidad, handoff y performance.
+
+### Changed
+
+- Reestructuradas todas las Skills como procedimientos operativos con activadores, entradas, bloqueos, pasos, validación finita, manejo de fallos y responsabilidades.
+- Aclarada la trazabilidad `CA-06 → CP-004` y su separación respecto a la selección de herramientas, ejecución y certificación.
+- Reforzado el handoff para obtener URL, build y commit exclusivamente de la evidencia del pipeline.
+- Reforzadas las tres Skills de performance para exigir carga y umbrales aprobados, destino no productivo y revisión de JTL y `errorCount`.
+- Ampliado el validador para exigir la estructura mínima de toda Skill catalogada y rechazar afirmaciones de ejecución o certificación autónoma e instrucciones de persistir secretos.
+
+## [0.2.1] - 2026-11-03
 
 ### Added
 

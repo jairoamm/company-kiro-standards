@@ -65,6 +65,35 @@ DANGEROUS_PATTERNS = {
     "PowerShell expression execution": re.compile(r"(?i)\bInvoke-Expression\b"),
     "force push": re.compile(r"\bgit\s+push\b[^\n]*--force(?:-with-lease)?\b"),
 }
+FORBIDDEN_SKILL_CLAIMS = {
+    "claims that the Skill executes tests": re.compile(
+        r"(?im)^\s*(?:[-*]\s+)?(?:esta|este|la|el|una)\s+skill\s+"
+        r"(?:(?:debe|puede|va\s+a)\s+)?(?:ejecuta|ejecutar|ejecutará|corre|correr|lanza|lanzar)\b"
+    ),
+    "claims that the Skill certifies results": re.compile(
+        r"(?im)^\s*(?:[-*]\s+)?(?:esta|este|la|el|una)\s+skill\s+"
+        r"(?:(?:debe|puede|va\s+a)\s+)?(?:certifica|certificar|certificará)\b"
+    ),
+    "instructs secret persistence": re.compile(
+        r"(?im)^\s*(?:[-*]|\d+\.)?\s*"
+        r"(?:almacena|guardar?|guarda|persiste|persistir)\s+"
+        r"(?:los?\s+|las?\s+)?(?:secretos?|tokens?|contraseñas?|credenciales?)\b"
+    ),
+}
+REQUIRED_SKILL_SECTIONS = (
+    "Propósito",
+    "Cuándo usarla",
+    "Políticas relacionadas",
+    "Entradas obligatorias",
+    "Precondiciones y bloqueos",
+    "Procedimiento",
+    "Archivos de salida",
+    "Ejemplo de prompt",
+    "Ejemplo de salida",
+    "Validación",
+    "Manejo de fallos",
+    "Límites y responsabilidades",
+)
 PERSONAL_PATH_PATTERNS = {
     "macOS personal path": re.compile(r"/Users/[^/<\s]+/"),
     "Windows personal path": re.compile(r"[A-Za-z]:\\Users\\[^\\<\s]+\\"),
@@ -79,6 +108,7 @@ REQUIRED_ROLE_ASSETS: Mapping[str, Set[str]] = {
     "qa": {
         "steering-qa-black-box-test-automation",
         "skill-generate-selenium-tests",
+        "skill-generate-karate-tests",
         "skill-test-plan-traceability",
         "skill-generate-jmeter-project",
         "skill-create-performance-plan",
@@ -90,6 +120,7 @@ FORBIDDEN_ROLE_ASSETS: Mapping[str, Set[str]] = {
         "steering-qa-test-automation-standards",
         "steering-qa-black-box-test-automation",
         "skill-generate-selenium-tests",
+        "skill-generate-karate-tests",
         "skill-generate-jmeter-project",
         "skill-create-performance-plan",
         "skill-analyze-jmeter-report",
@@ -214,6 +245,120 @@ def parse_frontmatter(path: Path, validator: Validator) -> Mapping[str, str]:
         key, value = line.split(":", 1)
         result[key.strip()] = value.strip()
     return result
+
+
+def markdown_section(text: str, title: str) -> str | None:
+    match = re.search(
+        rf"(?ms)^##\s+{re.escape(title)}\s*$\n(.*?)(?=^##\s+|\Z)",
+        text,
+    )
+    return match.group(1).strip() if match else None
+
+
+def validate_skills(
+    assets: Mapping[str, Mapping[str, Any]], validator: Validator
+) -> None:
+    skill_paths = sorted((ROOT / "skills").glob("**/SKILL.md"))
+    discovered_sources = {
+        path.relative_to(ROOT).as_posix()
+        for path in skill_paths
+    }
+    catalog_sources = {
+        source
+        for asset in assets.values()
+        for source in [asset.get("source")]
+        if asset.get("kind") == "skill" and isinstance(source, str)
+    }
+
+    for source in sorted(discovered_sources - catalog_sources):
+        validator.error(f"Skill is not registered in catalog.json: {source}")
+    for source in sorted(catalog_sources - discovered_sources):
+        validator.error(f"Catalog Skill source is missing: {source}")
+
+    for path in skill_paths:
+        relative = path.relative_to(ROOT)
+        text = path.read_text(encoding="utf-8")
+        frontmatter = parse_frontmatter(path, validator)
+        if frontmatter.get("name") != path.parent.name:
+            validator.error(f"Skill name must match its directory: {relative}")
+        if len(frontmatter.get("description", "")) < 40:
+            validator.error(f"Skill description is too short: {relative}")
+
+        for title in REQUIRED_SKILL_SECTIONS:
+            occurrences = len(
+                re.findall(rf"(?m)^##\s+{re.escape(title)}\s*$", text)
+            )
+            if occurrences != 1:
+                validator.error(
+                    f"Skill {relative} must contain exactly one section: {title}"
+                )
+
+        inputs = markdown_section(text, "Entradas obligatorias")
+        if inputs is not None and "`" not in inputs:
+            validator.error(
+                f"Skill {relative} inputs must identify paths or formats"
+            )
+
+        outputs = markdown_section(text, "Archivos de salida")
+        if outputs is not None and "`" not in outputs:
+            validator.error(
+                f"Skill {relative} outputs must identify exact or parameterized paths"
+            )
+
+        if not re.search(r"\b(?:MUST|SHOULD|MAY)\b", text):
+            validator.error(
+                f"Skill {relative} must use a normative keyword with an explanation"
+            )
+
+        if (
+            path.parent.name == "test-plan-traceability"
+            and markdown_section(text, "Lo que esta Skill no hace") is None
+        ):
+            validator.error(
+                f"Skill {relative} must state what traceability does not do"
+            )
+
+        procedure = markdown_section(text, "Procedimiento")
+        if procedure is not None:
+            step_numbers = [
+                int(value)
+                for value in re.findall(r"(?m)^(\d+)\.\s+\S", procedure)
+            ]
+            if len(step_numbers) < 3:
+                validator.error(
+                    f"Skill {relative} must contain at least three numbered steps"
+                )
+            elif step_numbers != list(range(1, len(step_numbers) + 1)):
+                validator.error(
+                    f"Skill {relative} procedure steps must be sequential from 1"
+                )
+
+        prompt_example = markdown_section(text, "Ejemplo de prompt")
+        if prompt_example is not None and "```text" not in prompt_example:
+            validator.error(
+                f"Skill {relative} prompt example must use a fenced text block"
+            )
+
+        output_example = markdown_section(text, "Ejemplo de salida")
+        if output_example is not None and "```" not in output_example:
+            validator.error(
+                f"Skill {relative} output example must contain a fenced example"
+            )
+
+        validation = markdown_section(text, "Validación")
+        if validation is not None and "```bash" not in validation:
+            validator.error(
+                f"Skill {relative} validation must contain finite shell commands"
+            )
+
+        if "no almacenes secretos" not in text.casefold():
+            validator.error(
+                f"Skill {relative} must explicitly forbid storing secrets"
+            )
+
+        for label, pattern in FORBIDDEN_SKILL_CLAIMS.items():
+            if pattern.search(text):
+                validator.error(f"Unsafe Skill statement ({label}) in {relative}")
 
 
 def validate_catalog(validator: Validator) -> tuple[str, Mapping[str, Mapping[str, Any]]]:
@@ -451,6 +596,7 @@ def main() -> int:
     validator = Validator()
     validate_root(validator)
     version, assets = validate_catalog(validator)
+    validate_skills(assets, validator)
     validate_profiles(assets, validator)
     validate_bundles(version, assets, validator)
     validate_text_content(validator)

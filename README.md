@@ -31,7 +31,7 @@ El contenido de esas páginas se resume y reformula aquí.
 
 ## Qué agrega este repositorio
 
-`catalog.json`, `bundles/`, `profiles/`, `tools/` y `checks/` son convenciones de este proyecto. No son funciones nativas llamadas “bundles”, “profiles” o “Standards Hub” dentro de Kiro.
+`catalog.json`, `bundles/`, `profiles/`, `tools/` y `checks/` son convenciones de este proyecto. No son funciones nativas llamadas “bundles”, “profiles” o “Standards Hub” dentro de Kiro. Las Skills de Selenium, Karate y JMeter son assets versionados que describen procedimientos; Kiro no incorpora esas herramientas ni produce su evidencia de ejecución por el solo hecho de instalar el bundle.
 
 ```text
 Release central revisada
@@ -97,7 +97,23 @@ Todos los bundles son assets de workspace y se instalan en `<repo>/.kiro/`.
 |---|---|
 | `common` | Seguridad, calidad de ingeniería y flujo Dev + QA |
 | `developer` | `common`, estándares de desarrollo, testabilidad UI, preparación de handoff y trazabilidad |
-| `qa` | `common`, automatización de caja negra, generación Selenium, trazabilidad y las tres Skills de performance |
+| `qa` | `common`, automatización de caja negra, generación Selenium y Karate, trazabilidad y las tres Skills de performance |
+
+## Skills operativos del catálogo
+
+Cada `SKILL.md` define entradas, bloqueos, pasos, rutas de salida, ejemplos, validación finita, manejo de fallos y responsabilidades. El catálogo incluye:
+
+| Skill | Resultado preparado |
+|---|---|
+| `prepare-qa-handoff` | Contrato `ui-selectors.json`, contexto del pipeline, datos sintéticos y limitaciones para QA |
+| `test-plan-traceability` | Transcripción aprobada, brechas y matriz; no elige una herramienta automáticamente |
+| `generate-selenium-tests` | Java 21/JUnit 5 para E2E web, compilado antes de cualquier ejecución remota autorizada |
+| `generate-karate-tests` | Features Karate y runner JUnit para la única suite versionada de regresión API |
+| `create-performance-plan` | Plan con carga y umbrales trazados a fuentes aprobadas |
+| `generate-jmeter-project` | JMX parametrizado y checklist, sin enviar tráfico |
+| `analyze-jmeter-report` | Análisis de JTL, `errorCount`, criterios y observabilidad de un run terminado |
+
+Las Skills preparan artefactos o analizan evidencia existente. La autorización de ejecución y la certificación permanecen en las personas y herramientas responsables.
 
 Las Specs nunca se distribuyen desde este repositorio. Pertenecen a una Historia de Usuario y a un proyecto concretos.
 
@@ -222,7 +238,7 @@ No se recomienda una sincronización manual diaria ni consumir `main` directamen
 python3 checks/validate.py
 ```
 
-El validador revisa JSON, bundles, herencia, fuentes, destinos, frontmatter, perfiles, symlinks, rutas personales y patrones básicos de secretos o instrucciones peligrosas. También comprueba que los perfiles no entren en los bundles. No ejecuta Skills.
+El validador revisa JSON, bundles, herencia, fuentes, destinos, frontmatter, perfiles, symlinks, rutas personales y patrones básicos de secretos o instrucciones peligrosas. Para cada Skill exige la estructura operativa mínima, pasos numerados, ejemplos, comandos finitos, una prohibición explícita de almacenar secretos y ausencia de afirmaciones de ejecución o certificación autónoma. También comprueba que todas las Skills estén catalogadas y que los perfiles no entren en los bundles. No ejecuta Skills.
 
 ## Gobierno y publicación
 

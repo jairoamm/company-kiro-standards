@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Catálogo versionado de Steering y Skills de workspace compartidos para equipos de desarrollo y calidad.",
   "assets": [
     {
@@ -92,6 +92,16 @@
       "status": "approved",
       "source": "skills/qa/generate-selenium-tests/SKILL.md",
       "target": "skills/generate-selenium-tests/SKILL.md"
+    },
+    {
+      "id": "skill-generate-karate-tests",
+      "name": "generate-karate-tests",
+      "kind": "skill",
+      "category": "quality-assurance",
+      "owner": "quality-leads",
+      "status": "approved",
+      "source": "skills/qa/generate-karate-tests/SKILL.md",
+      "target": "skills/generate-karate-tests/SKILL.md"
     },
     {
       "id": "skill-test-plan-traceability",
