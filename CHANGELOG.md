@@ -2,7 +2,19 @@
 
 Todos los cambios relevantes de este proyecto se documentan aquí.
 
-## [0.2.2] - Unreleased
+## [0.2.3] - Unreleased
+
+### Added
+
+- Skill QA `prepare-synthetic-test-data` para que Kiro proponga un borrador de `qa-input/<HU>/test-data.json` desde la HU, el plan y las limitaciones disponibles, con revisión y responsabilidad de QA.
+
+### Changed
+
+- Añadida la Skill al catálogo y al bundle QA; los tres bundles avanzan de forma compatible a `0.2.3`.
+- Ampliado el validador para exigir la adopción QA y los límites de datos reales, estados de backend, ejecución y certificación.
+- La Skill documenta la secuencia: preparar y revisar los datos antes de generar Selenium, Karate o JMeter.
+
+## [0.2.2] - 2026-11-05
 
 ### Added
 

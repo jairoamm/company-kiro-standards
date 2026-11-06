@@ -94,6 +94,23 @@ REQUIRED_SKILL_SECTIONS = (
     "Manejo de fallos",
     "Límites y responsabilidades",
 )
+SKILLS_REQUIRING_NEGATIVE_SCOPE = {
+    "prepare-synthetic-test-data",
+    "test-plan-traceability",
+}
+SKILL_REQUIRED_SNIPPETS: Mapping[str, Set[str]] = {
+    "prepare-synthetic-test-data": {
+        "qa es propietario del archivo",
+        "kiro propone un borrador",
+        "no copia ni anonimiza datos reales",
+        "no inventa estados de backend",
+        "dev o plataforma",
+        "no ejecuta pruebas",
+        "no certifica",
+        "qa-input/<hu>/test-data.json",
+        "revisión humana obligatoria",
+    },
+}
 PERSONAL_PATH_PATTERNS = {
     "macOS personal path": re.compile(r"/Users/[^/<\s]+/"),
     "Windows personal path": re.compile(r"[A-Za-z]:\\Users\\[^\\<\s]+\\"),
@@ -107,6 +124,7 @@ REQUIRED_ROLE_ASSETS: Mapping[str, Set[str]] = {
     },
     "qa": {
         "steering-qa-black-box-test-automation",
+        "skill-prepare-synthetic-test-data",
         "skill-generate-selenium-tests",
         "skill-generate-karate-tests",
         "skill-test-plan-traceability",
@@ -311,11 +329,22 @@ def validate_skills(
             )
 
         if (
-            path.parent.name == "test-plan-traceability"
+            path.parent.name in SKILLS_REQUIRING_NEGATIVE_SCOPE
             and markdown_section(text, "Lo que esta Skill no hace") is None
         ):
+            validator.error(f"Skill {relative} must state what it does not do")
+
+        required_snippets = SKILL_REQUIRED_SNIPPETS.get(path.parent.name, set())
+        folded_text = text.casefold()
+        missing_snippets = sorted(
+            snippet
+            for snippet in required_snippets
+            if snippet.casefold() not in folded_text
+        )
+        if missing_snippets:
             validator.error(
-                f"Skill {relative} must state what traceability does not do"
+                f"Skill {relative} is missing required boundaries: "
+                + ", ".join(missing_snippets)
             )
 
         procedure = markdown_section(text, "Procedimiento")

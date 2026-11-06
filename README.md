@@ -31,7 +31,7 @@ El contenido de esas páginas se resume y reformula aquí.
 
 ## Qué agrega este repositorio
 
-`catalog.json`, `bundles/`, `profiles/`, `tools/` y `checks/` son convenciones de este proyecto. No son funciones nativas llamadas “bundles”, “profiles” o “Standards Hub” dentro de Kiro. Las Skills de Selenium, Karate y JMeter son assets versionados que describen procedimientos; Kiro no incorpora esas herramientas ni produce su evidencia de ejecución por el solo hecho de instalar el bundle.
+`catalog.json`, `bundles/`, `profiles/`, `tools/` y `checks/` son convenciones de este proyecto. No son funciones nativas llamadas “bundles”, “profiles” o “Standards Hub” dentro de Kiro. Las Skills de preparación de datos sintéticos, Selenium, Karate y JMeter son assets versionados que describen procedimientos; Kiro no incorpora esas herramientas ni produce datos aprobados o evidencia de ejecución por el solo hecho de instalar el bundle.
 
 ```text
 Release central revisada
@@ -97,7 +97,7 @@ Todos los bundles son assets de workspace y se instalan en `<repo>/.kiro/`.
 |---|---|
 | `common` | Seguridad, calidad de ingeniería y flujo Dev + QA |
 | `developer` | `common`, estándares de desarrollo, testabilidad UI, preparación de handoff y trazabilidad |
-| `qa` | `common`, automatización de caja negra, generación Selenium y Karate, trazabilidad y las tres Skills de performance |
+| `qa` | `common`, automatización de caja negra, preparación de datos sintéticos, generación Selenium y Karate, trazabilidad y las tres Skills de performance |
 
 ## Skills operativos del catálogo
 
@@ -107,11 +107,14 @@ Cada `SKILL.md` define entradas, bloqueos, pasos, rutas de salida, ejemplos, val
 |---|---|
 | `prepare-qa-handoff` | Contrato `ui-selectors.json`, contexto del pipeline, datos sintéticos y limitaciones para QA |
 | `test-plan-traceability` | Transcripción aprobada, brechas y matriz; no elige una herramienta automáticamente |
+| `prepare-synthetic-test-data` | Borrador de `qa-input/<HU>/test-data.json` trazado a HU y plan; QA revisa, aprueba y mantiene el archivo |
 | `generate-selenium-tests` | Java 21/JUnit 5 para E2E web, compilado antes de cualquier ejecución remota autorizada |
 | `generate-karate-tests` | Features Karate y runner JUnit para la única suite versionada de regresión API |
 | `create-performance-plan` | Plan con carga y umbrales trazados a fuentes aprobadas |
 | `generate-jmeter-project` | JMX parametrizado y checklist, sin enviar tráfico |
 | `analyze-jmeter-report` | Análisis de JTL, `errorCount`, criterios y observabilidad de un run terminado |
+
+Para los datos de prueba, QA es propietario de `test-data.json`. Kiro puede proponer un borrador desde la HU, el plan y las limitaciones disponibles, pero no copia ni anonimiza datos reales, no inventa estados de backend y no sustituye la revisión humana obligatoria.
 
 Las Skills preparan artefactos o analizan evidencia existente. La autorización de ejecución y la certificación permanecen en las personas y herramientas responsables.
 

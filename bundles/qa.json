@@ -1,12 +1,13 @@
 {
   "schemaVersion": "1.0",
   "name": "qa",
-  "version": "0.2.2",
-  "description": "Assets de workspace: baseline común, automatización web y API, trazabilidad y Skills de performance.",
+  "version": "0.2.3",
+  "description": "Assets de workspace: baseline común, preparación de datos sintéticos, automatización web y API, trazabilidad y Skills de performance.",
   "extends": ["common"],
   "assets": [
     "steering-qa-test-automation-standards",
     "steering-qa-black-box-test-automation",
+    "skill-prepare-synthetic-test-data",
     "skill-generate-selenium-tests",
     "skill-generate-karate-tests",
     "skill-test-plan-traceability",

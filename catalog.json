@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Catálogo versionado de Steering y Skills de workspace compartidos para equipos de desarrollo y calidad.",
   "assets": [
     {
@@ -82,6 +82,16 @@
       "status": "approved",
       "source": "skills/development/prepare-qa-handoff/SKILL.md",
       "target": "skills/prepare-qa-handoff/SKILL.md"
+    },
+    {
+      "id": "skill-prepare-synthetic-test-data",
+      "name": "prepare-synthetic-test-data",
+      "kind": "skill",
+      "category": "quality-assurance",
+      "owner": "quality-leads",
+      "status": "approved",
+      "source": "skills/qa/prepare-synthetic-test-data/SKILL.md",
+      "target": "skills/prepare-synthetic-test-data/SKILL.md"
     },
     {
       "id": "skill-generate-selenium-tests",
