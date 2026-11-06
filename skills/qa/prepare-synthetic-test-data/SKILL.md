@@ -7,7 +7,7 @@ description: Guía a QA para preparar y revisar un borrador de test-data.json co
 
 ## Propósito
 
-Guiar a Kiro para que, cuando QA lo solicite, proponga un borrador trazable de datos sintéticos para los casos aprobados. QA es propietario de `test-data.json`: revisa cada valor, solicita correcciones, aprueba el archivo y mantiene sus cambios. El archivo aprobado se prepara antes de generar Selenium, Karate o JMeter.
+Guiar a Kiro para que, cuando QA lo solicite, proponga un borrador trazable de datos sintéticos para los casos aprobados. QA es dueño del archivo `test-data.json`: revisa cada valor, solicita correcciones, aprueba el archivo y mantiene sus cambios. El archivo aprobado se prepara antes de generar Selenium, Karate o JMeter.
 
 ## Cuándo usarla
 
@@ -174,8 +174,8 @@ La validación comprueba sintaxis y reglas declaradas del archivo. No demuestra 
 
 ## Límites y responsabilidades
 
-- QA es propietario del archivo, de su revisión, de su aprobación y de su mantenimiento.
-- Kiro propone un borrador trazable y aplica las correcciones que QA solicite; no asume ownership ni aprobación.
+- QA es dueño del archivo, de su revisión, de su aprobación y de su mantenimiento.
+- Kiro propone un borrador trazable y aplica las correcciones que QA solicite; no asume la responsabilidad ni la aprobación.
 - Dev o plataforma proporciona un mecanismo de seed o provisión cuando un caso necesita estado persistido.
 - No almacenes secretos, tokens, cookies, credenciales ni datos reales en `test-data.json`, comentarios, commits, logs o evidencia.
 - No uses el archivo para afirmar que una cuenta existe o que un ambiente está listo.

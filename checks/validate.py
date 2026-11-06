@@ -100,7 +100,7 @@ SKILLS_REQUIRING_NEGATIVE_SCOPE = {
 }
 SKILL_REQUIRED_SNIPPETS: Mapping[str, Set[str]] = {
     "prepare-synthetic-test-data": {
-        "qa es propietario del archivo",
+        "qa es dueño del archivo",
         "kiro propone un borrador",
         "no copia ni anonimiza datos reales",
         "no inventa estados de backend",
