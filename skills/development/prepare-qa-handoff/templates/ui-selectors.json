@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "contractVersion": "NO_SUMINISTRADO",
+  "historia": "{{STORY_ID}}",
+  "selectors": [
+    {
+      "nombre": "{{SELECTOR_NAME}}",
+      "pantalla": "{{SCREEN}}",
+      "estado": "{{VISIBLE_STATE}}",
+      "estrategia": "{{id|data-testid|role}}",
+      "valor": "{{SELECTOR_VALUE}}",
+      "casosRelacionados": ["{{CASE_ID}}"]
+    }
+  ]
+}

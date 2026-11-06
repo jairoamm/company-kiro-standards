@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""Validate the repository without executing any Skill content."""
+"""Validate repository content and run allowlisted local support checks."""
 
 from __future__ import annotations
 
+import ast
+import csv
 import json
 import re
+import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict, List, Mapping, Set
+from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -110,12 +115,69 @@ SKILL_REQUIRED_SNIPPETS: Mapping[str, Set[str]] = {
         "qa-input/<hu>/test-data.json",
         "revisión humana obligatoria",
     },
+    "generate-postman-collection": {
+        "exploración",
+        "reproducción rápida",
+        "karate conserva la regresión versionada",
+        "postman no ejecuta la colección",
+        "postman/credential-recovery.postman_collection.json",
+        "build/postman/junit.xml",
+        "build/postman/report.html",
+    },
 }
 PERSONAL_PATH_PATTERNS = {
     "macOS personal path": re.compile(r"/Users/[^/<\s]+/"),
     "Windows personal path": re.compile(r"[A-Za-z]:\\Users\\[^\\<\s]+\\"),
 }
-TEXT_SUFFIXES = {".md", ".json", ".py", ".sh", ".ps1", ".txt", ".yaml", ".yml"}
+TEXT_SUFFIXES = {
+    ".csv",
+    ".feature",
+    ".java",
+    ".jmx",
+    ".js",
+    ".json",
+    ".jtl",
+    ".md",
+    ".properties",
+    ".ps1",
+    ".py",
+    ".sh",
+    ".template",
+    ".txt",
+    ".xml",
+    ".yaml",
+    ".yml",
+}
+SKILL_SUPPORT_DIRECTORIES = {"examples", "templates", "schemas", "scripts", "references"}
+MARKDOWN_LINK_PATTERN = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
+SAFE_SKILL_SMOKE_TESTS = (
+    (
+        "skills/qa/generate-selenium-tests/scripts/validate_ui_selectors.py",
+        "skills/qa/generate-selenium-tests/examples/ui-selectors.json",
+        "--schema",
+        "skills/qa/generate-selenium-tests/schemas/ui-selectors.schema.json",
+    ),
+    (
+        "skills/qa/prepare-synthetic-test-data/scripts/validate_test_data.py",
+        "skills/qa/prepare-synthetic-test-data/examples/test-data.json",
+        "--schema",
+        "skills/qa/prepare-synthetic-test-data/schemas/test-data.schema.json",
+    ),
+    (
+        "skills/qa/generate-postman-collection/scripts/validate_postman_assets.py",
+        "--collection",
+        "skills/qa/generate-postman-collection/examples/credential-recovery.postman_collection.json",
+        "--environment",
+        "skills/qa/generate-postman-collection/templates/local.postman_environment.json",
+    ),
+    (
+        "skills/performance/analyze-jmeter-report/scripts/reconcile_jmeter_errors.py",
+        "--jtl",
+        "skills/performance/analyze-jmeter-report/examples/results.jtl",
+        "--statistics",
+        "skills/performance/analyze-jmeter-report/examples/statistics.json",
+    ),
+)
 REQUIRED_ROLE_ASSETS: Mapping[str, Set[str]] = {
     "developer": {
         "steering-development-ui-testability",
@@ -127,6 +189,7 @@ REQUIRED_ROLE_ASSETS: Mapping[str, Set[str]] = {
         "skill-prepare-synthetic-test-data",
         "skill-generate-selenium-tests",
         "skill-generate-karate-tests",
+        "skill-generate-postman-collection",
         "skill-test-plan-traceability",
         "skill-generate-jmeter-project",
         "skill-create-performance-plan",
@@ -139,6 +202,7 @@ FORBIDDEN_ROLE_ASSETS: Mapping[str, Set[str]] = {
         "steering-qa-black-box-test-automation",
         "skill-generate-selenium-tests",
         "skill-generate-karate-tests",
+        "skill-generate-postman-collection",
         "skill-generate-jmeter-project",
         "skill-create-performance-plan",
         "skill-analyze-jmeter-report",
@@ -198,11 +262,32 @@ class Validator:
         self.warnings.append(message)
 
 
+class DuplicateJsonKeyError(ValueError):
+    """Raised when a JSON object repeats a key."""
+
+
+def reject_duplicate_json_keys(pairs: List[tuple[str, Any]]) -> Dict[str, Any]:
+    result: Dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise DuplicateJsonKeyError(key)
+        result[key] = value
+    return result
+
+
 def load_json(path: Path, validator: Validator) -> Mapping[str, Any]:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
+        value = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=reject_duplicate_json_keys,
+        )
     except FileNotFoundError:
         validator.error(f"Missing JSON file: {path.relative_to(ROOT)}")
+        return {}
+    except DuplicateJsonKeyError as error:
+        validator.error(
+            f"Duplicate JSON key in {path.relative_to(ROOT)}: {error}"
+        )
         return {}
     except json.JSONDecodeError as error:
         validator.error(f"Invalid JSON in {path.relative_to(ROOT)}: {error}")
@@ -440,9 +525,17 @@ def validate_catalog(validator: Validator) -> tuple[str, Mapping[str, Mapping[st
             validator.error(f"Source for {asset_id} must be under {expected_source_prefix}/")
         if target.parts[0] != expected_target_prefix:
             validator.error(f"Target for {asset_id} must be under {expected_target_prefix}/")
-        if target.as_posix() in targets:
+        if kind == "skill":
+            if source.name != "SKILL.md" or target.name != "SKILL.md":
+                validator.error(f"Skill source and target must name SKILL.md: {asset_id}")
+            if source.parent.name != raw_asset.get("name"):
+                validator.error(f"Skill source directory/name mismatch for {asset_id}")
+            if target.parent.name != raw_asset.get("name"):
+                validator.error(f"Skill target directory/name mismatch for {asset_id}")
+        target_key = target.as_posix().casefold()
+        if target_key in targets:
             validator.error(f"Duplicate catalog target: {target}")
-        targets.add(target.as_posix())
+        targets.add(target_key)
 
         if source_path.is_file() and kind == "skill":
             frontmatter = parse_frontmatter(source_path, validator)
@@ -601,12 +694,12 @@ def validate_bundles(
 
 
 def validate_text_content(validator: Validator) -> None:
-    excluded_prefixes = {Path(".git"), Path("checks")}
+    excluded_paths = {Path("checks/validate.py")}
     for path in ROOT.rglob("*"):
         if not path.is_file() or path.is_symlink() or path.suffix not in TEXT_SUFFIXES:
             continue
         relative = path.relative_to(ROOT)
-        if any(relative == prefix or prefix in relative.parents for prefix in excluded_prefixes):
+        if ".git" in relative.parts or relative in excluded_paths:
             continue
         text = path.read_text(encoding="utf-8", errors="replace")
         for label, pattern in SECRET_PATTERNS.items():
@@ -621,6 +714,181 @@ def validate_text_content(validator: Validator) -> None:
                     validator.error(f"Dangerous instruction ({label}) in {relative}")
 
 
+def markdown_link_targets(text: str) -> List[str]:
+    targets: List[str] = []
+    for match in MARKDOWN_LINK_PATTERN.finditer(text):
+        raw_target = match.group(1).strip()
+        if raw_target.startswith("<") and ">" in raw_target:
+            raw_target = raw_target[1 : raw_target.index(">")]
+        elif " " in raw_target:
+            raw_target = raw_target.split(" ", 1)[0]
+        targets.append(raw_target)
+    return targets
+
+
+def validate_markdown_links(validator: Validator) -> None:
+    repository = ROOT.resolve()
+    for path in sorted(ROOT.rglob("*.md")):
+        relative = path.relative_to(ROOT)
+        if ".git" in relative.parts or path.is_symlink():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for raw_target in markdown_link_targets(text):
+            if not raw_target or raw_target.startswith("#"):
+                continue
+            parsed = urlsplit(raw_target)
+            if parsed.scheme or parsed.netloc:
+                continue
+            decoded_path = unquote(parsed.path)
+            if not decoded_path:
+                continue
+            if decoded_path.startswith("/"):
+                validator.error(f"Absolute Markdown link in {relative}: {raw_target}")
+                continue
+            resolved = (path.parent / decoded_path).resolve(strict=False)
+            try:
+                resolved.relative_to(repository)
+            except ValueError:
+                validator.error(f"Markdown link escapes repository in {relative}: {raw_target}")
+                continue
+            if not resolved.exists():
+                validator.error(f"Broken Markdown link in {relative}: {raw_target}")
+
+
+def validate_json_and_examples(validator: Validator) -> None:
+    for path in sorted(ROOT.rglob("*.json")):
+        relative = path.relative_to(ROOT)
+        if ".git" in relative.parts or path.is_symlink():
+            continue
+        load_json(path, validator)
+
+    for path in sorted((ROOT / "skills").glob("**/schemas/*.schema.json")):
+        schema = load_json(path, validator)
+        relative = path.relative_to(ROOT)
+        if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
+            validator.error(f"Schema must declare draft 2020-12: {relative}")
+        schema_id = schema.get("$id")
+        if not isinstance(schema_id, str) or not schema_id.startswith("https://"):
+            validator.error(f"Schema must declare an HTTPS $id: {relative}")
+        elif not urlsplit(schema_id).hostname or not urlsplit(schema_id).hostname.endswith(
+            ".test"
+        ):
+            validator.error(f"Schema $id must use a reserved .test domain: {relative}")
+        if schema.get("type") != "object":
+            validator.error(f"Schema root must describe an object: {relative}")
+
+    for path in sorted((ROOT / "skills").glob("**/examples/*.jmx")) + sorted(
+        (ROOT / "skills").glob("**/templates/*.jmx")
+    ):
+        try:
+            ET.parse(path)
+        except (ET.ParseError, OSError) as error:
+            validator.error(f"Invalid XML in {path.relative_to(ROOT)}: {error}")
+
+    for path in sorted((ROOT / "skills").glob("**/examples/*.csv")):
+        try:
+            with path.open(newline="", encoding="utf-8") as stream:
+                reader = csv.reader(stream)
+                header = next(reader, None)
+                first_row = next(reader, None)
+            if not header or first_row is None:
+                validator.error(
+                    f"CSV example must contain a header and data: {path.relative_to(ROOT)}"
+                )
+        except (OSError, csv.Error) as error:
+            validator.error(f"Invalid CSV in {path.relative_to(ROOT)}: {error}")
+
+
+def validate_skill_support(validator: Validator) -> None:
+    for skill_path in sorted((ROOT / "skills").glob("**/SKILL.md")):
+        skill_directory = skill_path.parent
+        relative_skill = skill_path.relative_to(ROOT)
+        text = skill_path.read_text(encoding="utf-8")
+        links = markdown_link_targets(text)
+        support_directories = []
+
+        for child in sorted(skill_directory.iterdir()):
+            if child.name == "SKILL.md":
+                continue
+            if not child.is_dir() or child.name not in SKILL_SUPPORT_DIRECTORIES:
+                validator.error(
+                    f"Unexpected Skill entry outside support folders: {child.relative_to(ROOT)}"
+                )
+                continue
+            support_directories.append(child)
+
+        if not support_directories:
+            validator.error(f"Skill has no reusable support files: {relative_skill}")
+
+        for support_directory in support_directories:
+            files = sorted(
+                path
+                for path in support_directory.rglob("*")
+                if path.is_file() and not path.is_symlink()
+            )
+            if not files:
+                validator.error(
+                    f"Skill support folder is empty: {support_directory.relative_to(ROOT)}"
+                )
+            prefix = f"{support_directory.name}/"
+            if not any(target.startswith(prefix) for target in links):
+                validator.error(
+                    f"Skill {relative_skill} must link explicitly to {support_directory.name}/"
+                )
+
+        scripts_directory = skill_directory / "scripts"
+        if not scripts_directory.is_dir():
+            continue
+        for script in sorted(scripts_directory.glob("*.py")):
+            try:
+                source = script.read_text(encoding="utf-8")
+                ast.parse(source, filename=str(script))
+            except (OSError, SyntaxError) as error:
+                validator.error(f"Invalid Python script {script.relative_to(ROOT)}: {error}")
+                continue
+            if "ArgumentParser(" not in source or "if __name__ == \"__main__\"" not in source:
+                validator.error(
+                    f"Skill script must expose a conventional CLI: {script.relative_to(ROOT)}"
+                )
+
+
+def validate_no_empty_directories(validator: Validator) -> None:
+    for path in sorted((ROOT / "skills").rglob("*")):
+        relative = path.relative_to(ROOT)
+        if not path.is_dir() or path.is_symlink():
+            continue
+        try:
+            next(path.iterdir())
+        except StopIteration:
+            validator.error(f"Empty directory is not allowed: {relative}")
+
+
+def run_safe_skill_smoke_tests(validator: Validator) -> None:
+    for command in SAFE_SKILL_SMOKE_TESTS:
+        script = ROOT / command[0]
+        if not script.is_file() or script.is_symlink():
+            validator.error(f"Allowlisted smoke script is missing or unsafe: {command[0]}")
+            continue
+        for arguments in (("--help",), command[1:]):
+            try:
+                completed = subprocess.run(
+                    [sys.executable, str(script), *arguments],
+                    cwd=ROOT,
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                    check=False,
+                )
+            except (OSError, subprocess.TimeoutExpired) as error:
+                validator.error(f"Smoke check could not run for {command[0]}: {error}")
+                continue
+            if completed.returncode != 0:
+                detail = completed.stderr.strip() or completed.stdout.strip() or "no output"
+                validator.error(
+                    f"Smoke check failed for {command[0]} with {list(arguments)}: {detail}"
+                )
+
+
 def main() -> int:
     validator = Validator()
     validate_root(validator)
@@ -628,7 +896,12 @@ def main() -> int:
     validate_skills(assets, validator)
     validate_profiles(assets, validator)
     validate_bundles(version, assets, validator)
+    validate_markdown_links(validator)
+    validate_json_and_examples(validator)
+    validate_skill_support(validator)
+    validate_no_empty_directories(validator)
     validate_text_content(validator)
+    run_safe_skill_smoke_tests(validator)
 
     for warning in validator.warnings:
         print(f"WARNING: {warning}")

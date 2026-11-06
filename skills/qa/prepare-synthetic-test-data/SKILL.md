@@ -1,182 +1,128 @@
 ---
 name: prepare-synthetic-test-data
-description: Guía a QA para preparar y revisar un borrador de test-data.json con datos exclusivamente sintéticos, trazables a una Historia de Usuario y su plan de pruebas, antes de generar automatización.
+description: Guía a QA para preparar y revisar un borrador de test-data.json con datos exclusivamente sintéticos y trazables antes de generar automatización.
 ---
 
 # Preparar datos sintéticos para automatización QA
 
 ## Propósito
 
-Guiar a Kiro para que, cuando QA lo solicite, proponga un borrador trazable de datos sintéticos para los casos aprobados. QA es dueño del archivo `test-data.json`: revisa cada valor, solicita correcciones, aprueba el archivo y mantiene sus cambios. El archivo aprobado se prepara antes de generar Selenium, Karate o JMeter.
+Guiar a Kiro, cuando QA lo solicite, para proponer un borrador trazable de datos sintéticos. QA es dueño del archivo, revisa cada valor, lo aprueba y mantiene sus cambios. El archivo aprobado se prepara antes de Selenium, Karate o JMeter.
 
 ## Cuándo usarla
 
-Úsala después de que QA haya revisado la Historia de Usuario y el plan de pruebas, y antes de generar scripts que consuman datos. También puede usarse para revisar un `test-data.json` existente cuando cambian casos o límites aprobados.
-
-No la uses para extraer datos de ambientes, transformar datos de clientes, preparar estados de backend ni ejecutar automatización.
+Úsala después de revisar la HU y el plan, o para actualizar un borrador cuando cambian casos o límites. No la uses para obtener datos de ambientes, transformar datos de clientes, provisionar backend ni ejecutar automatización.
 
 ## Políticas relacionadas
 
-Aplica `steering/core/security.md` y `steering/qa/test-automation-standards.md`. Cuando los datos alimenten pruebas de caja negra, aplica además `steering/qa/black-box-test-automation.md`. Los Steering fijan las reglas permanentes de seguridad y responsabilidad; esta Skill define el procedimiento puntual de preparación.
+Aplica `steering/core/security.md`, `steering/qa/test-automation-standards.md` y, para caja negra, `steering/qa/black-box-test-automation.md`.
+
+## Recursos incluidos
+
+- [Ejemplo completo de `test-data.json`](examples/test-data.json)
+- [Schema del contrato](schemas/test-data.schema.json)
+- [Validador estático sin dependencias externas](scripts/validate_test_data.py)
 
 ## Entradas obligatorias
 
-Recibe estas entradas del mismo repositorio QA:
+- `qa-input/<HU>/user-story.md` y `qa-input/<HU>/test-plan.md`, revisados y de la misma HU.
+- Esquemas o limitaciones versionadas que definan formato, longitud y valores permitidos.
+- Casos que usarán cada dato y su categoría: válido, inválido o límite.
+- Convención existente de `test-data.json`, si la hay.
 
-- `qa-input/<HU>/user-story.md`: Historia de Usuario, criterios y reglas de negocio revisados.
-- `qa-input/<HU>/test-plan.md`: casos aprobados, identificadores de datos, resultados esperados y límites.
-- Esquemas y limitaciones disponibles para la misma HU, por ejemplo `qa-input/<HU>/api-contract.json`, `qa-input/<HU>/ui-selectors.json`, `qa-input/<HU>/performance-inputs.json` o documentación versionada de formato, longitud y valores permitidos.
-- Lista de casos que usarán cada dato y clasificación esperada: válido, inválido o límite.
-- Convención existente de `test-data.json`, si el repositorio ya tiene una.
-
-`user-story.md` y `test-plan.md` MUST existir y coincidir en la HU, porque Kiro no puede decidir reglas funcionales. Un esquema o límite es obligatorio cuando un caso depende de él; que no esté disponible es un bloqueo, no permiso para inferirlo.
+Un esquema o límite es obligatorio cuando un caso depende de él. Su ausencia bloquea el dato; Kiro no puede inventar reglas funcionales.
 
 ## Precondiciones y bloqueos
 
-Antes de proponer valores, confirma:
+Confirma que cada dato corresponde a un paso aprobado, que sus restricciones citan una fuente y que puede crearse desde cero. Los valores no pueden derivar de personas, cuentas, pedidos o eventos reales.
 
-- QA identifica la HU, los casos incluidos y la versión revisada del plan.
-- Cada categoría de dato se relaciona con un paso o una precondición del plan.
-- Las reglas de formato y límites provienen de una entrada citada.
-- Los valores pueden crearse desde cero y no derivan de una persona, cuenta, pedido o evento real.
-- El repositorio no requiere secretos, tokens, cookies ni credenciales para representar el caso.
-
-Detente si las fuentes se contradicen, falta un límite necesario, solo existe una muestra real o un caso presupone un estado de backend no provisionado. Presenta el archivo, campo, caso y owner que debe resolver cada bloqueo.
+Detente ante fuentes contradictorias, límites ausentes, una muestra real como única entrada o un estado de backend no provisionado. Informa archivo, campo, caso y owner responsable.
 
 ## Procedimiento
 
-1. Lee `qa-input/<HU>/user-story.md`, `qa-input/<HU>/test-plan.md` y los esquemas o limitaciones disponibles. Registra qué fuente define cada formato y límite.
-2. Construye una tabla temporal `caso → identificador de dato → categoría → restricción → resultado esperado`. No añadas un dato que no esté relacionado con un caso aprobado.
-3. Separa valores de entrada de estados del sistema. Kiro MUST NOT inventar estados de backend porque un texto sintético no crea una cuenta, un permiso ni un registro persistido.
-4. Si un caso requiere seed o provisión, registra el requisito y el caso bloqueado para Dev o plataforma. No marques ese estado como disponible en `test-data.json` hasta recibir un mecanismo y una confirmación verificables.
-5. Crea valores desde cero. Para correos usa dominios reservados como `.test`; para nombres y usuarios usa identidades claramente ficticias. Kiro no copia ni anonimiza datos reales.
-6. Incluye, solo cuando el plan los exija, representantes válidos, inválidos y de límite. Distingue el valor exacto del límite de los valores inmediatamente fuera de él.
-7. Conserva el esquema existente del repositorio. Si no existe, propone un objeto JSON pequeño con `schemaVersion`, `story`, `classification` y grupos nombrados por dominio funcional.
-8. Escribe únicamente el borrador `qa-input/<HU>/test-data.json`. No agregues datos a código, prompts guardados, logs ni evidencia.
-9. Ejecuta solo la validación JSON finita de esta Skill y muestra el diff junto con la matriz de trazabilidad. No ejecutes Selenium, Karate, JMeter ni otro runner.
-10. Solicita revisión humana obligatoria de QA. El archivo no queda aprobado para consumo hasta que QA confirme valores, casos, límites, clasificación sintética y requisitos de seed.
+1. Lee HU, plan y restricciones; registra la fuente de cada formato y límite.
+2. Construye `caso → dato → categoría → restricción → resultado esperado`.
+3. Separa entradas de estados persistidos. Kiro MUST NOT inventar estados de backend.
+4. Registra cualquier seed requerido para Dev o plataforma y deja bloqueado el caso hasta recibir evidencia verificable.
+5. Crea valores desde cero; usa identidades ficticias y dominios `.test` para correos.
+6. Incluye valores válidos, inválidos o de límite solo cuando el plan los exija.
+7. Conserva el esquema existente o usa el [schema incluido](schemas/test-data.schema.json) como contrato inicial aprobado por QA.
+8. Escribe únicamente `qa-input/<HU>/test-data.json` y no dupliques datos en código o logs.
+9. Ejecuta el validador estático y muestra diff y trazabilidad. No ejecutes pruebas.
+10. Solicita revisión humana obligatoria; Kiro propone un borrador, pero QA decide su aprobación.
 
 ## Archivos de salida
-
-La única salida versionada es:
 
 ```text
 qa-input/<HU>/test-data.json
 ```
 
-Kiro presenta además, en la conversación, la matriz de trazabilidad, los bloqueos y el diff para revisión. No crea un segundo catálogo de datos ni archivos de seed.
+La conversación puede incluir trazabilidad y bloqueos; no crea otro catálogo ni archivos de seed.
 
 ## Ejemplo de prompt
 
 ```text
-Usa prepare-synthetic-test-data para proponer un borrador de
-qa-input/HU-DEMO-001/test-data.json. Lee user-story.md, test-plan.md y las
-limitaciones disponibles. Incluye solo los datos de los casos aprobados,
-explica válido, inválido y límite, y usa correos .test e identidades ficticias.
-No copies ni anonimices datos reales, no inventes estados de backend y no
-inicies las pruebas. Muéstrame la trazabilidad y el diff para revisión de QA.
+Usa prepare-synthetic-test-data para proponer qa-input/HU-DEMO-001/test-data.json
+desde la HU, el plan y sus límites. Usa solo datos ficticios, muestra trazabilidad y diff,
+y no inventes estados de backend ni ejecutes pruebas.
 ```
 
 ## Ejemplo de salida
-
-Fragmento breve basado en `HU-DEMO-001`:
 
 ```json
 {
   "schemaVersion": "1.0",
   "story": "HU-DEMO-001",
   "classification": "synthetic",
-  "email": {
-    "valid": "ana.demo@example.test",
-    "invalid": "ana.demo"
-  },
-  "username": {
-    "valid": "ana_demo",
-    "tooShort": "ad"
-  }
+  "cases": ["CP-004"],
+  "records": []
 }
 ```
 
-`email.valid` usa el dominio reservado `.test`; `email.invalid` cubre el formato inválido; `username.valid` es ficticio; y `username.tooShort` cubre el valor de dos caracteres inmediatamente por debajo del límite mínimo de tres definido por la HU. El ejemplo no afirma que esos usuarios existan en un backend.
+El [ejemplo completo](examples/test-data.json) añade registros y fuentes sin afirmar que exista una cuenta remota.
 
 ## Revisión humana obligatoria
 
-QA debe comprobar antes de aprobar:
-
-- cada clave se relaciona con un caso e identificador del plan;
-- cada formato y límite cita una fuente disponible;
-- los valores son ficticios y no se derivaron de datos reales;
-- los correos sintéticos usan `.test`;
-- ningún valor presupone un estado de backend sin seed confirmado;
-- el diff contiene solo `qa-input/<HU>/test-data.json`.
-
-La aprobación debe quedar en el mecanismo de revisión del repositorio. El silencio, una validación JSON verde o la propuesta de Kiro no equivalen a aprobación.
-
-## Validación
-
-Ejecuta validaciones locales, estáticas y finitas; no inician runners ni realizan conexiones:
-
-```bash
-HU="${HU:?defina el identificador de la HU}"
-DATA_FILE="qa-input/$HU/test-data.json"
-test -f "$DATA_FILE"
-python3 -m json.tool "$DATA_FILE" >/dev/null
-python3 - "$DATA_FILE" "$HU" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-story = sys.argv[2]
-data = json.loads(path.read_text(encoding="utf-8"))
-if data.get("story") != story:
-    raise SystemExit("story no coincide con la ruta solicitada")
-if data.get("classification") != "synthetic":
-    raise SystemExit("classification debe ser synthetic")
-
-def strings(value):
-    if isinstance(value, dict):
-        for nested in value.values():
-            yield from strings(nested)
-    elif isinstance(value, list):
-        for nested in value:
-            yield from strings(nested)
-    elif isinstance(value, str):
-        yield value
-
-for value in strings(data):
-    if "@" in value and not value.rsplit("@", 1)[1].endswith(".test"):
-        raise SystemExit("todo correo sintético debe usar un dominio .test")
-PY
-git diff --check -- "$DATA_FILE"
-```
-
-La validación comprueba sintaxis y reglas declaradas del archivo. No demuestra que exista un estado remoto ni aprueba los datos en nombre de QA.
-
-## Manejo de fallos
-
-- **HU o plan ausente:** no propongas el archivo; solicita la ruta y versión revisada.
-- **Fuentes contradictorias:** lista la regla, las fuentes y los casos afectados; QA decide cuál corregir.
-- **Esquema o límite ausente:** bloquea únicamente los datos que dependan de esa definición; no inventes un valor predeterminado.
-- **Muestra real como única entrada:** recházala y solicita reglas o un esquema; no la copies, enmascares ni anonimices.
-- **Estado de backend requerido:** registra la necesidad de seed o provisión para Dev o plataforma y deja el caso bloqueado.
-- **JSON inválido:** corrige la estructura del borrador sin cambiar reglas funcionales y repite una vez la validación estática.
-- **Revisión QA pendiente:** conserva el archivo como borrador y no lo presentes a las Skills de generación.
+QA comprueba relación con casos, fuentes de límites, origen ficticio, dominios `.test`, requisitos de seed y alcance del diff. Una validación verde o el silencio no equivalen a aprobación.
 
 ## Lo que esta Skill no hace
 
-- No obtiene, copia, enmascara ni anonimiza datos reales.
-- Kiro no inventa estados de backend, formatos, límites, cuentas ni permisos.
-- No crea ni ejecuta seeds; registra esa necesidad para Dev o plataforma.
-- No genera pruebas Selenium, Karate o JMeter.
-- No ejecuta pruebas, no accede a ambientes y no produce evidencia de ejecución.
-- No certifica una Historia de Usuario ni reemplaza la aprobación de QA.
+- No obtiene, copia, enmascara ni anonimiza datos reales. Kiro no copia ni anonimiza datos reales.
+- No inventa estados de backend, formatos, límites, cuentas ni permisos.
+- No crea ni ejecuta seeds; registra la necesidad para Dev o plataforma.
+- No genera Selenium, Karate o JMeter.
+- No ejecuta pruebas ni accede a ambientes.
+- No certifica una HU ni reemplaza la revisión humana obligatoria.
+
+## Validación
+
+Define `SKILL_DIR` como el directorio de esta Skill y ejecuta solo comprobaciones estáticas:
+
+```bash
+HU="${HU:?defina HU}"
+SKILL_DIR="${SKILL_DIR:?defina la ruta de prepare-synthetic-test-data}"
+DATA_FILE="qa-input/$HU/test-data.json"
+python3 "$SKILL_DIR/scripts/validate_test_data.py" "$DATA_FILE" \
+  --schema "$SKILL_DIR/schemas/test-data.schema.json"
+git diff --check -- "$DATA_FILE"
+```
+
+La validación comprueba el contrato declarado. No demuestra estado remoto ni aprueba los datos.
+
+## Manejo de fallos
+
+- **HU o plan ausente:** no propongas el archivo.
+- **Fuentes contradictorias:** lista reglas, fuentes y casos; QA decide la corrección.
+- **Límite ausente:** bloquea solo los datos afectados; no asignes un valor predeterminado.
+- **Muestra real:** recházala y solicita reglas o schema; no la copies ni anonimices.
+- **Estado de backend:** registra seed o provisión para Dev o plataforma.
+- **JSON inválido:** corrige estructura sin alterar reglas y repite una vez la validación.
+- **Revisión pendiente:** conserva el estado de borrador y no lo entregues a Skills de generación.
 
 ## Límites y responsabilidades
 
-- QA es dueño del archivo, de su revisión, de su aprobación y de su mantenimiento.
-- Kiro propone un borrador trazable y aplica las correcciones que QA solicite; no asume la responsabilidad ni la aprobación.
-- Dev o plataforma proporciona un mecanismo de seed o provisión cuando un caso necesita estado persistido.
-- No almacenes secretos, tokens, cookies, credenciales ni datos reales en `test-data.json`, comentarios, commits, logs o evidencia.
-- No uses el archivo para afirmar que una cuenta existe o que un ambiente está listo.
-- Un JSON válido es un insumo preparado. No ejecuta automatización y no certifica resultados.
+- QA es dueño del archivo, su revisión, aprobación y mantenimiento.
+- Kiro propone un borrador trazable y aplica correcciones solicitadas.
+- Dev o plataforma aporta provisión verificable cuando se requiere estado persistido.
+- No almacenes secretos, tokens, cookies, credenciales ni datos reales.
+- Un JSON válido es un insumo preparado; no ejecuta automatización ni certifica resultados.

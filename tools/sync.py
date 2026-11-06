@@ -217,6 +217,84 @@ def resolve_bundle_assets(
     return list(unique.values())
 
 
+def expand_assets(assets: Sequence[Asset]) -> List[Asset]:
+    """Expand each Skill asset to every regular file in its directory."""
+    repository = REPOSITORY_ROOT.resolve()
+    expanded: List[Asset] = []
+    targets: Dict[str, tuple[str, str]] = {}
+
+    for asset in assets:
+        source_path = filesystem_path(REPOSITORY_ROOT, asset.source)
+        reject_symlink_components(source_path)
+
+        if asset.kind == "steering":
+            candidates = [(asset.source, asset.target)]
+        else:
+            if asset.source.name != "SKILL.md" or asset.target.name != "SKILL.md":
+                raise SyncError(
+                    f"Skill {asset.asset_id} source and target must name SKILL.md"
+                )
+            source_directory = source_path.parent
+            if not source_directory.is_dir() or source_directory.is_symlink():
+                raise SyncError(
+                    f"Skill source directory must be a regular directory: {asset.source.parent}"
+                )
+
+            candidates = []
+            for candidate in sorted(source_directory.rglob("*")):
+                if candidate.is_symlink():
+                    raise SyncError(
+                        "Symlinks are not allowed inside Skill assets: "
+                        f"{candidate.relative_to(REPOSITORY_ROOT)}"
+                    )
+                if candidate.is_dir():
+                    continue
+                if not candidate.is_file():
+                    raise SyncError(
+                        "Skill assets must contain only regular files and directories: "
+                        f"{candidate.relative_to(REPOSITORY_ROOT)}"
+                    )
+                resolved_candidate = candidate.resolve(strict=True)
+                if not is_within(resolved_candidate, repository):
+                    raise SyncError(
+                        f"Skill source escapes the repository: {candidate}"
+                    )
+                relative_file = PurePosixPath(
+                    candidate.relative_to(source_directory).as_posix()
+                )
+                candidates.append(
+                    (
+                        asset.source.parent / relative_file,
+                        asset.target.parent / relative_file,
+                    )
+                )
+
+            if not any(source.name == "SKILL.md" for source, _ in candidates):
+                raise SyncError(f"Skill directory omits SKILL.md: {asset.source.parent}")
+
+        for source, target in candidates:
+            source_file = filesystem_path(REPOSITORY_ROOT, source)
+            if not source_file.is_file() or source_file.is_symlink():
+                raise SyncError(f"Asset source must be a regular file: {source}")
+            resolved_source = source_file.resolve(strict=True)
+            if not is_within(resolved_source, repository):
+                raise SyncError(f"Asset source escapes the repository: {source}")
+
+            target_key = target.as_posix()
+            collision_key = target_key.casefold()
+            previous_target = targets.get(collision_key)
+            if previous_target is not None:
+                previous_asset, previous_path = previous_target
+                raise SyncError(
+                    "Target collision between "
+                    f"{previous_asset}:{previous_path} and {asset.asset_id}:{target}"
+                )
+            targets[collision_key] = (asset.asset_id, target_key)
+            expanded.append(Asset(asset.asset_id, source, target, asset.kind))
+
+    return expanded
+
+
 def read_manifest(kiro_home: Path) -> Optional[Mapping[str, Any]]:
     path = kiro_home / STATE_DIRECTORY / MANIFEST_NAME
     if not path.exists():
@@ -237,6 +315,9 @@ def manifest_targets(manifest: Optional[Mapping[str, Any]]) -> Dict[str, Mapping
         if not isinstance(entry, dict):
             raise SyncError("Installed manifest has an invalid file entry")
         target = safe_relative_path(entry.get("target"), "installed target").as_posix()
+        collision_key = target.casefold()
+        if any(existing.casefold() == collision_key for existing in result):
+            raise SyncError(f"Installed manifest contains duplicate target: {target}")
         result[target] = entry
     return result
 
@@ -523,7 +604,8 @@ def main(argv: Sequence[str]) -> int:
             raise SyncError("--bundle is required for dry-run and apply")
 
         version, catalog_assets = parse_catalog()
-        assets = resolve_bundle_assets(arguments.bundle, catalog_assets)
+        selected_assets = resolve_bundle_assets(arguments.bundle, catalog_assets)
+        asset_files = expand_assets(selected_assets)
         bundle = read_bundle(arguments.bundle)
         if bundle.get("version") != version:
             raise SyncError(
@@ -531,7 +613,7 @@ def main(argv: Sequence[str]) -> int:
             )
 
         manifest = read_manifest(kiro_home)
-        plan = build_plan(assets, kiro_home, manifest)
+        plan = build_plan(asset_files, kiro_home, manifest)
         print_plan(arguments.bundle, version, kiro_home, plan)
 
         if arguments.verify:

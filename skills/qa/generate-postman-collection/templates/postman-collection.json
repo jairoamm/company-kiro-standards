@@ -1,0 +1,47 @@
+{
+  "info": {
+    "_postman_id": "{{UUID_V4}}",
+    "name": "{{STORY_ID}} - {{FLOW_NAME}}",
+    "description": "Colección para {{exploración|reproducción rápida|intercambio}}. La regresión versionada permanece en Karate.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "{{FLOW_NAME}}",
+      "item": [
+        {
+          "name": "{{CASE_ID}} {{REQUEST_NAME}}",
+          "request": {
+            "method": "{{HTTP_METHOD}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{SYNTHETIC_JSON_BODY}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}{{RELATIVE_PATH}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["{{PATH_SEGMENT}}"]
+            },
+            "description": "{{TRACEABILITY_AND_PURPOSE}}"
+          },
+          "event": [],
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": []
+}

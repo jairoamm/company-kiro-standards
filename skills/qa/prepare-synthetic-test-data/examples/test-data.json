@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "story": "HU-DEMO-001",
+  "classification": "synthetic",
+  "cases": ["CP-004"],
+  "records": [
+    {
+      "id": "invalid-credentials",
+      "cases": ["CP-004"],
+      "category": "invalid",
+      "values": {
+        "email": "qa.invalid@example.test",
+        "credentialInput": "synthetic-invalid-value"
+      },
+      "constraints": [
+        {
+          "field": "email",
+          "rule": "Debe tener formato de correo y usar un dominio reservado",
+          "source": "user-story.md#CA-06"
+        },
+        {
+          "field": "credentialInput",
+          "rule": "No corresponde a una identidad provisionada",
+          "source": "test-plan.md#CP-004"
+        }
+      ],
+      "backendState": "not-required"
+    }
+  ],
+  "sources": [
+    {
+      "id": "CA-06",
+      "path": "qa-input/HU-DEMO-001/user-story.md",
+      "revision": "synthetic-example"
+    },
+    {
+      "id": "CP-004",
+      "path": "qa-input/HU-DEMO-001/test-plan.md",
+      "revision": "synthetic-example"
+    }
+  ],
+  "seedRequirements": []
+}

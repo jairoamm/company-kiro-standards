@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "story": "HU-DEMO-001",
+  "case": "CP-004",
+  "classification": "synthetic",
+  "email": "qa.invalid@example.test",
+  "credentialInput": "synthetic-invalid-value",
+  "backendState": "not-required"
+}

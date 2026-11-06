@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0",
+  "story": "HU-DEMO-001",
+  "status": "ready-for-qa-review",
+  "environment": "qa-synthetic",
+  "baseUrl": "${BASE_URL}",
+  "buildId": "build-synthetic-004",
+  "applicationCommit": "0000000000000000000000000000000000000004",
+  "pipelineRunReference": "pipeline-run-synthetic-004",
+  "remoteExecutionAuthorization": "not-authorized"
+}

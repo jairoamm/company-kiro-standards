@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.test/qa/test-data.schema.json",
+  "title": "Datos sintéticos trazables para QA",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "story",
+    "classification",
+    "cases",
+    "records",
+    "sources",
+    "seedRequirements"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "story": {
+      "type": "string",
+      "pattern": "^HU-[A-Z0-9]+(?:-[A-Z0-9]+)*$"
+    },
+    "classification": {
+      "const": "synthetic"
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/caseId"
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/record"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "seedRequirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/seedRequirement"
+      }
+    }
+  },
+  "$defs": {
+    "caseId": {
+      "type": "string",
+      "pattern": "^CP-[0-9]+$"
+    },
+    "primitiveValue": {
+      "type": ["string", "number", "integer", "boolean", "null"]
+    },
+    "constraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "rule", "source"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "cases", "category", "values", "constraints", "backendState"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/caseId"
+          }
+        },
+        "category": {
+          "enum": ["valid", "invalid", "boundary"]
+        },
+        "values": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/primitiveValue"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/constraint"
+          }
+        },
+        "backendState": {
+          "enum": [
+            "not-required",
+            "required-not-provisioned",
+            "provisioned-by-approved-mechanism"
+          ]
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "revision"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "seedRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case", "status", "owner", "reference"],
+      "properties": {
+        "case": {
+          "$ref": "#/$defs/caseId"
+        },
+        "status": {
+          "enum": [
+            "required-not-provisioned",
+            "provisioned-by-approved-mechanism"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

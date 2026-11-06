@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "name": "developer",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Assets de workspace: baseline común más desarrollo y preparación del handoff para QA.",
   "extends": ["common"],
   "assets": [

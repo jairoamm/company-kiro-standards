@@ -1,0 +1,2 @@
+scenario,source,model,concurrency_or_rate,ramp_up_seconds,duration_seconds,mix_percent
+{{SCENARIO_ID}},NO_SUMINISTRADO,NO_SUMINISTRADO,NO_SUMINISTRADO,NO_SUMINISTRADO,NO_SUMINISTRADO,NO_SUMINISTRADO

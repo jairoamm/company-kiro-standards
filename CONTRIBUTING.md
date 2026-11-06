@@ -34,6 +34,8 @@
 
 - Procedimiento especializado y repetible.
 - Activadores, entradas, salidas y límites explícitos.
+- `SKILL.md` conciso; ejemplos completos, templates, schemas, scripts y referencias viven en carpetas de soporte solo cuando aportan valor.
+- Enlaces relativos válidos desde `SKILL.md` y ninguna carpeta vacía.
 - Sin efectos implícitos.
 - Sin secretos.
 - Evaluado con entradas completas, incompletas y contradictorias.

@@ -44,7 +44,7 @@ Requirements, Design y Tasks de la funcionalidad concreta. No se centraliza.
 
 ### Procedimientos puntuales
 
-Un procedimiento especializado y reutilizable puede ser un Skill. Su inclusión en un bundle sigue siendo configuración de workspace.
+Un procedimiento especializado y reutilizable puede ser un Skill. Su inclusión en un bundle sigue siendo configuración de workspace. `SKILL.md` conserva el flujo operativo y su mismo directorio puede contener `examples/`, `templates/`, `schemas/`, `scripts/` o `references/`; el sincronizador copia únicamente las carpetas presentes y registra cada archivo.
 
 ## Flujo de datos
 

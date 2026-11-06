@@ -1,0 +1,16 @@
+@{{STORY_ID}}
+Feature: {{FEATURE_DESCRIPTION}}
+
+  Background:
+    * def configuredBaseUrl = karate.properties['baseUrl'] || java.lang.System.getenv('BASE_URL')
+    * if (!configuredBaseUrl) karate.fail('BASE_URL debe identificar el destino autorizado')
+    * url configuredBaseUrl
+    * def data = read('{{RELATIVE_DATA_FILE}}')
+
+  @{{CASE_ID}}
+  Scenario: {{SCENARIO_DESCRIPTION}}
+    Given path {{PATH_SEGMENTS}}
+    And request {{REQUEST_EXPRESSION}}
+    When method {{HTTP_METHOD}}
+    Then status {{EXPECTED_STATUS}}
+    And match {{CONTRACT_ASSERTIONS}}

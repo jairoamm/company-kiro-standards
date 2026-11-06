@@ -24,9 +24,12 @@ El destino contiene:
 
 ```text
 <repo>/.kiro/steering/
-<repo>/.kiro/skills/
+<repo>/.kiro/skills/<skill>/SKILL.md
+<repo>/.kiro/skills/<skill>/{examples,templates,schemas,scripts,references}/  # solo si existen
 <repo>/.kiro/.standards-hub/manifest.json
 ```
+
+El sincronizador instala cada Skill como un paquete completo. El manifiesto registra un hash por archivo auxiliar, por lo que `--verify` detecta cambios o ausencias dentro de cualquier carpeta de soporte.
 
 Recomendaciones:
 

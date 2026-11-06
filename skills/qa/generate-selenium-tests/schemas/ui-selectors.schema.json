@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.test/qa/ui-selectors.schema.json",
+  "title": "Contrato de selectores UI",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "contractVersion", "historia", "selectors"],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "contractVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "historia": {
+      "type": "string",
+      "pattern": "^HU-[A-Z0-9]+(?:-[A-Z0-9]+)*$"
+    },
+    "selectors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/selector"
+      }
+    }
+  },
+  "$defs": {
+    "caseId": {
+      "type": "string",
+      "pattern": "^CP-[0-9]+$"
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nombre",
+        "pantalla",
+        "estado",
+        "estrategia",
+        "valor",
+        "casosRelacionados"
+      ],
+      "properties": {
+        "nombre": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9]*$"
+        },
+        "pantalla": {
+          "type": "string",
+          "minLength": 1
+        },
+        "estado": {
+          "type": "string",
+          "minLength": 1
+        },
+        "estrategia": {
+          "enum": ["id", "data-testid", "role"]
+        },
+        "valor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nombreAccesible": {
+          "type": "string",
+          "minLength": 1
+        },
+        "casosRelacionados": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/caseId"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "estrategia": {
+                "const": "role"
+              }
+            },
+            "required": ["estrategia"]
+          },
+          "then": {
+            "required": ["nombreAccesible"]
+          }
+        }
+      ]
+    }
+  }
+}

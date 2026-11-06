@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0",
+  "story": "{{STORY_ID}}",
+  "status": "pending",
+  "environment": "NO_SUMINISTRADO",
+  "baseUrl": "${BASE_URL}",
+  "buildId": "NO_SUMINISTRADO",
+  "applicationCommit": "NO_SUMINISTRADO",
+  "pipelineRunReference": "NO_SUMINISTRADO",
+  "remoteExecutionAuthorization": "not-authorized"
+}

@@ -1,0 +1,20 @@
+{
+  "Total": {
+    "sampleCount": 3,
+    "errorCount": 1,
+    "errorPct": 33.3333333333,
+    "meanResTime": 876.6666666667,
+    "medianResTime": 920,
+    "pct1ResTime": 1300,
+    "throughput": 1.5
+  },
+  "GET orders": {
+    "sampleCount": 3,
+    "errorCount": 1,
+    "errorPct": 33.3333333333,
+    "meanResTime": 876.6666666667,
+    "medianResTime": 920,
+    "pct1ResTime": 1300,
+    "throughput": 1.5
+  }
+}

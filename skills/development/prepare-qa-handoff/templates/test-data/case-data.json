@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "story": "{{STORY_ID}}",
+  "case": "{{CASE_ID}}",
+  "classification": "synthetic",
+  "values": {
+    "{{FIELD_NAME}}": "NO_SUMINISTRADO"
+  },
+  "backendState": "NO_SUMINISTRADO"
+}

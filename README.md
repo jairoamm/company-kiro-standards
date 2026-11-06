@@ -31,7 +31,7 @@ El contenido de esas páginas se resume y reformula aquí.
 
 ## Qué agrega este repositorio
 
-`catalog.json`, `bundles/`, `profiles/`, `tools/` y `checks/` son convenciones de este proyecto. No son funciones nativas llamadas “bundles”, “profiles” o “Standards Hub” dentro de Kiro. Las Skills de preparación de datos sintéticos, Selenium, Karate y JMeter son assets versionados que describen procedimientos; Kiro no incorpora esas herramientas ni produce datos aprobados o evidencia de ejecución por el solo hecho de instalar el bundle.
+`catalog.json`, `bundles/`, `profiles/`, `tools/` y `checks/` son convenciones de este proyecto. No son funciones nativas llamadas “bundles”, “profiles” o “Standards Hub” dentro de Kiro. Las Skills de datos sintéticos, Selenium, Karate, Postman y JMeter son assets versionados que describen procedimientos; Kiro no incorpora esas herramientas ni produce datos aprobados o evidencia de ejecución por el solo hecho de instalar el bundle.
 
 ```text
 Release central revisada
@@ -73,6 +73,22 @@ Release central revisada
 └── docs/
 ```
 
+## Anatomía de una Skill
+
+Cada Skill conserva el procedimiento operativo en `SKILL.md` y añade únicamente los soportes que necesita:
+
+```text
+<skill>/
+├── SKILL.md       # entradas, procedimiento, salidas, validación, fallos y límites
+├── examples/      # ejemplos completos y exclusivamente sintéticos, si aportan valor
+├── templates/     # esqueletos reutilizables con placeholders claros, si aplican
+├── schemas/       # contratos JSON validables, cuando existe un contrato estable
+├── scripts/       # validaciones deterministas, locales y sin red, cuando son útiles
+└── references/    # explicación extensa que no pertenece al procedimiento principal
+```
+
+No todas las Skills necesitan todas las carpetas y no se permiten carpetas vacías. `SKILL.md` mantiene un ejemplo mínimo y enlaces relativos explícitos. Al instalar un asset de tipo `skill`, el sincronizador distribuye el directorio completo y registra cada archivo en el manifiesto; nunca ejecuta sus scripts.
+
 ## Alcance y destino
 
 | Fuente | Alcance | Destino | Instalación |
@@ -97,7 +113,7 @@ Todos los bundles son assets de workspace y se instalan en `<repo>/.kiro/`.
 |---|---|
 | `common` | Seguridad, calidad de ingeniería y flujo Dev + QA |
 | `developer` | `common`, estándares de desarrollo, testabilidad UI, preparación de handoff y trazabilidad |
-| `qa` | `common`, automatización de caja negra, preparación de datos sintéticos, generación Selenium y Karate, trazabilidad y las tres Skills de performance |
+| `qa` | `common`, automatización de caja negra, datos sintéticos, Selenium, Karate como regresión API, Postman para exploración y reproducción, trazabilidad y las tres Skills de performance |
 
 ## Skills operativos del catálogo
 
@@ -110,6 +126,7 @@ Cada `SKILL.md` define entradas, bloqueos, pasos, rutas de salida, ejemplos, val
 | `prepare-synthetic-test-data` | Borrador de `qa-input/<HU>/test-data.json` trazado a HU y plan; QA revisa, aprueba y mantiene el archivo |
 | `generate-selenium-tests` | Java 21/JUnit 5 para E2E web, compilado antes de cualquier ejecución remota autorizada |
 | `generate-karate-tests` | Features Karate y runner JUnit para la única suite versionada de regresión API |
+| `generate-postman-collection` | Colección compartible para exploración y reproducción rápida; Karate conserva la regresión del pipeline |
 | `create-performance-plan` | Plan con carga y umbrales trazados a fuentes aprobadas |
 | `generate-jmeter-project` | JMX parametrizado y checklist, sin enviar tráfico |
 | `analyze-jmeter-report` | Análisis de JTL, `errorCount`, criterios y observabilidad de un run terminado |
@@ -198,7 +215,8 @@ Ambos perfiles usan inclusión manual para que el rol se seleccione de forma exp
 - `--apply` es obligatorio para escribir.
 - `--kiro-home` debe ser una ruta absoluta y su padre debe existir.
 - Rechaza `/`, el home del usuario, este repositorio y rutas con symlinks.
-- Rechaza archivos de destino que no estén registrados como administrados.
+- Cada Skill se instala como directorio completo, incluidos sus ejemplos, templates, schemas, scripts y referencias presentes.
+- Rechaza traversal, symlinks, colisiones entre assets y archivos de destino no administrados.
 - No cambia de bundle sobre un mismo destino de forma implícita.
 - Cada aplicación crea un backup y un manifiesto con hashes SHA-256.
 - El rollback se niega a sobrescribir un archivo modificado después de instalarlo.
@@ -239,9 +257,10 @@ No se recomienda una sincronización manual diaria ni consumir `main` directamen
 
 ```bash
 python3 checks/validate.py
+python3 -m unittest discover -s checks -p 'test_*.py'
 ```
 
-El validador revisa JSON, bundles, herencia, fuentes, destinos, frontmatter, perfiles, symlinks, rutas personales y patrones básicos de secretos o instrucciones peligrosas. Para cada Skill exige la estructura operativa mínima, pasos numerados, ejemplos, comandos finitos, una prohibición explícita de almacenar secretos y ausencia de afirmaciones de ejecución o certificación autónoma. También comprueba que todas las Skills estén catalogadas y que los perfiles no entren en los bundles. No ejecuta Skills.
+El validador revisa JSON, schemas, enlaces relativos, soportes referenciados, carpetas vacías, bundles, fuentes, destinos, frontmatter, perfiles, symlinks, rutas personales, secretos e instrucciones peligrosas. Ejecuta únicamente los validadores auxiliares permitidos contra fixtures sintéticos locales; no inicia Selenium, Karate, Postman, Newman o JMeter. Las pruebas unitarias cubren empaquetado completo de Skills, compatibilidad con manifiestos anteriores, traversal, symlinks, colisiones y rollback.
 
 ## Gobierno y publicación
 

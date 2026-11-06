@@ -1,0 +1,4 @@
+criterion,status,observed,threshold,evidence
+NFR-SYN-03-p95,failed,1300 ms,<= 800 ms,statistics.json:GET orders
+NFR-SYN-03-errors,failed,33.3 %,< 1 %,results.jtl success=false + statistics.json errorCount=1
+STOP-SYN-01,inconclusive,NO_SUMINISTRADO,>= 5 % for 60 s,observability export missing

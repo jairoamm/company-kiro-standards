@@ -1,0 +1,2 @@
+scenario,source,model,concurrency,ramp_up_seconds,duration_seconds,mix_percent
+PERF-01,TRAFFIC-SYN-12,concurrency,20,120,600,100

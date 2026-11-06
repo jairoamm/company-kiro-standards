@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0",
+  "contractVersion": "1.2.0",
+  "historia": "HU-DEMO-001",
+  "selectors": [
+    {
+      "nombre": "correoLogin",
+      "pantalla": "login",
+      "estado": "formulario visible",
+      "estrategia": "id",
+      "valor": "login-email",
+      "casosRelacionados": ["CP-004"]
+    },
+    {
+      "nombre": "enviarLogin",
+      "pantalla": "login",
+      "estado": "formulario válido para envío",
+      "estrategia": "data-testid",
+      "valor": "login-submit",
+      "casosRelacionados": ["CP-004"]
+    },
+    {
+      "nombre": "mensajeCredencialesInvalidas",
+      "pantalla": "login",
+      "estado": "credenciales rechazadas",
+      "estrategia": "role",
+      "valor": "alert",
+      "nombreAccesible": "Credenciales inválidas",
+      "casosRelacionados": ["CP-004"]
+    }
+  ]
+}

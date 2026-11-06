@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.0",
+  "story": "HU-DEMO-001",
+  "classification": "synthetic",
+  "existingOrderId": "ORDER-SYNTHETIC-004",
+  "invalidOrderId": "INVALID FORMAT"
+}

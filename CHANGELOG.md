@@ -2,7 +2,23 @@
 
 Todos los cambios relevantes de este proyecto se documentan aquí.
 
-## [0.2.3] - Unreleased
+## [0.2.4] - Unreleased
+
+### Added
+
+- Carpetas de soporte específicas por Skill con ejemplos sintéticos completos, plantillas reutilizables, schemas JSON, referencias y validadores deterministas.
+- Skill QA `generate-postman-collection` para exploración, reproducción rápida y colecciones compartibles; Karate conserva la regresión API versionada del pipeline.
+- Schemas y validadores estáticos para `ui-selectors.json` y `test-data.json`, más reconciliación local de errores JTL frente a `statistics.json`.
+- Pruebas unitarias del sincronizador para empaquetado, compatibilidad, traversal, symlinks, colisiones, manifiesto y rollback.
+
+### Changed
+
+- Reducidos los `SKILL.md` a procedimientos operativos con ejemplos mínimos y enlaces relativos a soportes completos.
+- El sincronizador distribuye todos los archivos regulares del directorio de cada Skill, los registra individualmente en el manifiesto y conserva compatibilidad con instalaciones que solo contenían `SKILL.md`.
+- El validador revisa enlaces, soportes, JSON, schemas, ejemplos, secretos y carpetas vacías, y ejecuta únicamente smoke checks locales permitidos.
+- Catálogo y bundles avanzan a `0.2.4`; el bundle QA incluye la nueva Skill Postman.
+
+## [0.2.3] - 2026-11-05
 
 ### Added
 
